@@ -1,12 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-
-class Registeruser extends StatefulWidget {
-  const Registeruser({super.key});
+class Registerdriver extends StatefulWidget {
+  const Registerdriver({super.key});
 
   @override
-  State<Registeruser> createState() => _RegisteruserState();
+  State<Registerdriver> createState() => _RegisterdriverState();
 }
 
 TextEditingController usernameCtl = TextEditingController();
@@ -15,10 +14,9 @@ TextEditingController emailCtl = TextEditingController();
 TextEditingController walletCtl = TextEditingController();
 TextEditingController passwordCtl = TextEditingController();
 TextEditingController phoneCtl = TextEditingController();
+TextEditingController licenseCtl = TextEditingController();
 
-bool isLoading = false;
-
-class _RegisteruserState extends State<Registeruser> {
+class _RegisterdriverState extends State<Registerdriver> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,6 +62,20 @@ class _RegisteruserState extends State<Registeruser> {
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Phonenumber',
+                  filled: true,
+                  fillColor: Color(0xFFF0ECF6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: phoneCtl,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'License plate number',
                   filled: true,
                   fillColor: Color(0xFFF0ECF6),
                   border: OutlineInputBorder(

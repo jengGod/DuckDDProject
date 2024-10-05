@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
+import 'package:duckddproject/pages/RegisterDriver.dart';
+import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -152,9 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                                   children: [
                                     const Text("Don't have an account? "),
                                     TextButton(
-                                      onPressed: () {
-                                        // Navigate to sign up
-                                      },
+                                      onPressed: () => register(context),
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.transparent,
                                         padding: EdgeInsets
@@ -176,9 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                                   children: [
                                     const Text("Or join us as Duck driver "),
                                     TextButton(
-                                      onPressed: () {
-                                        
-                                      },
+                                      onPressed: () => registerDriver(context),
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.transparent,
                                         padding: EdgeInsets
@@ -211,6 +209,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+void register(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Registeruser()),
+    );
+  }
+
+void registerDriver(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Registerdriver()),
+    );
+  }
 // Custom Painter for diagonal background
 class DiagonalPainter extends CustomPainter {
   @override
