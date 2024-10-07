@@ -129,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () => login(context),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.black,
                                     padding: const EdgeInsets.symmetric(
@@ -155,9 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                                   children: [
                                     const Text("Don't have an account? "),
                                     TextButton(
-                                      onPressed: () {
-                                        // Navigate to sign up
-                                      },
+                                      onPressed:() => register(context),
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.transparent,
                                         padding: EdgeInsets
@@ -179,9 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                                   children: [
                                     const Text("Or join us as Duck driver "),
                                     TextButton(
-                                      onPressed: () {
-                                        
-                                      },
+                                      onPressed: () => registerDriver(context),
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.transparent,
                                         padding: EdgeInsets
