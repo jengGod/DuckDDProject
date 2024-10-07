@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 class Registerdriver extends StatefulWidget {
   const Registerdriver({super.key});
@@ -142,5 +144,25 @@ class _RegisterdriverState extends State<Registerdriver> {
 
   void register(BuildContext context) {
     log('user register');
+    var db = FirebaseFirestore.instance;
+
+    var data = {
+      'username': usernameCtl.text,
+      'email': emailCtl.text,
+      'phonenumber': phoneCtl.text,
+      'license': licenseCtl.text,
+      'password': passCtl.text
+    };
+    db.collection('Driver').doc(usernameCtl.text).set(data);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 }
+
+//pass conpass must match
+//cannot enter null value include spacebar value*
+//user driver image
+//button can click only once*

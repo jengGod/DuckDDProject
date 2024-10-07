@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 
 class Registeruser extends StatefulWidget {
@@ -130,6 +132,19 @@ class _RegisteruserState extends State<Registeruser> {
 
   void register(BuildContext context) {
     log('user register');
-    //ต่อ register พิมพ์ข้อมูล แล้วให้ลง firebase
+    var db = FirebaseFirestore.instance;
+
+    var data = {
+      'username': usernameCtl.text,
+      'email': emailCtl.text,
+      'phonenumber': phoneCtl.text,
+      'password': passCtl.text
+    };
+    db.collection('User').doc(usernameCtl.text).set(data);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 }
