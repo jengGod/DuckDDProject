@@ -1,6 +1,7 @@
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
+import 'package:duckddproject/pages/sendpackage.dart';
 import 'package:flutter/material.dart';
 
 class UserHomePage extends StatefulWidget {
@@ -89,7 +90,7 @@ class _UserHomePageState extends State<UserHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () => send(context),
+                  onPressed: () => receive(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 123, 122, 122),
                     padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
@@ -107,6 +108,12 @@ class _UserHomePageState extends State<UserHomePage> {
                   ),
                 ),
               ],
+            ),
+              const SizedBox(height: 80),
+            Image.network(
+              'https://s3-alpha-sig.figma.com/img/653f/b6ea/a590e785cdd2f0c86c5b78ee99208920?Expires=1729468800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=KHDXbSOF88y5BXTlOy-MFgf0I9QEqtdhDNLWaqE85DAAIZS-lRETTinI0ReepRhdRE29DRJP-jTX8xFyeEPLAot-pYqhSljUhBhUWamtO2-cL88fKSTp3Mvq1jqWThF265CHQEKvOnU-pjlICBShcsomCHJFyqKyK70eFD6R6McjD9qy7ObD~~Aq3wR9sHKhOIsKYPE2YUmHIsPhmT8nnQqNUdRE88EAa7j-DiQZ4ktMQvpRfiLCecgixkhSr6jMyNEZIcJ5QzBlA53QjbOh8ML35OfPY8SynyoWKynV5NNSL8xlqWtrsbor0yArX0h1MNrII9k~z0YaiOI2cJk9pQ__',
+              width: 250,
+              height: 250,
             ),
           ],
         ),
@@ -143,5 +150,10 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  void send(BuildContext context) {}
+  void send(BuildContext context) { Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SendPage()),
+    );}
+    
+  void receive(BuildContext context) {}
 }
