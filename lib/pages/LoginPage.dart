@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
-
-import 'package:duckddproject/pages/UserHome.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -57,148 +55,154 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                               mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 100),
+                              const Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontFamily: 'Lobster',
+                                  fontSize: 38,
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                ),
+                              ),
+                              Image.network(
+                                'https://s3-alpha-sig.figma.com/img/064a/5671/00d6873be4cfaff05137012a09f47e5b?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=JIqhPBJ6MNG-KtpO~z6EEKjjfguHVd9Jvj27YRgj5gvCNfdWuk0ODKaDNnOb1FNlNfjtBq739R2C3AIcE3tiME8j87uURXX~qwUmh-nycc51CltZoWsT4ghb6HMM5Hk81-bI2nH34QE0t6zeFRXpRyYKbfiGxO-zFXHfvXOX-IHZTdNiog7oJM0QQ3UVL5gHs9Gr6tkQN00LmC0majlu1qLvRuPm-pon0oqpar3LhmmIbqyK39N~NYpoZ5N9XIG3CEd2ab1wdYvVHmK8Cv1JtE4uqd0~0VFt-eOWabTxdxfFrCMLPKWN~JuKym-4S6g~~nnGKWvw3Ttq3Axx2K4qZA__',
+                                width: 100,
+                                height: 65,
+                              ),
+                            ],
+                           ),
+                          
+                          const Text(
+                            'PLEASE SIGN IN TO CONTINUE',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: 'Lobster',
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 30.0),
+                            child: Column(
                               children: [
-                                const SizedBox(height: 150),
-                                const Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    fontFamily: 'Lobster',
-                                    fontSize: 38,
-                                    color: Color.fromARGB(255, 255, 255, 255),
+                                TextField(
+                                  controller: emailCtl,
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    labelText: 'Email',
+                                    labelStyle: TextStyle(color: Colors.black),
+                                    fillColor: Color(0xFFF0ECF6),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10.0)),
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 20.0, vertical: 16.0),
+                                  ),
+                                  obscureText: true,
+                                ),
+                                const SizedBox(height: 10),
+                               TextField(
+                                  controller: passCtl,
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    labelText: 'Password',
+                                    labelStyle: TextStyle(color: Colors.black),
+                                    fillColor: Color(0xFFF0ECF6),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10.0)),
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 20.0, vertical: 16.0),
+                                  ),
+                                  obscureText: true,
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 50, vertical: 15),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Sign in',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                    ),
                                   ),
                                 ),
-                                Image.network(
-                                  'https://s3-alpha-sig.figma.com/img/064a/5671/00d6873be4cfaff05137012a09f47e5b?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=JIqhPBJ6MNG-KtpO~z6EEKjjfguHVd9Jvj27YRgj5gvCNfdWuk0ODKaDNnOb1FNlNfjtBq739R2C3AIcE3tiME8j87uURXX~qwUmh-nycc51CltZoWsT4ghb6HMM5Hk81-bI2nH34QE0t6zeFRXpRyYKbfiGxO-zFXHfvXOX-IHZTdNiog7oJM0QQ3UVL5gHs9Gr6tkQN00LmC0majlu1qLvRuPm-pon0oqpar3LhmmIbqyK39N~NYpoZ5N9XIG3CEd2ab1wdYvVHmK8Cv1JtE4uqd0~0VFt-eOWabTxdxfFrCMLPKWN~JuKym-4S6g~~nnGKWvw3Ttq3Axx2K4qZA__',
-                                  width: 100,
-                                  height: 65,
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text("Don't have an account? "),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Navigate to sign up
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.transparent,
+                                        padding: EdgeInsets
+                                            .zero, // Background color transparent
+                                      ),
+                                      child: const Text(
+                                        'Sign up',
+                                        style: TextStyle(
+                                          color: Colors
+                                              .blue, // Text color remains blue
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text("Or join us as Duck driver "),
+                                    TextButton(
+                                      onPressed: () {
+                                        
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.transparent,
+                                        padding: EdgeInsets
+                                            .zero, 
+                                      ),
+                                      child: const Text(
+                                        'Sign up as driver',
+                                        style: TextStyle(
+                                          color: Colors
+                                              .blue, 
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            const Text(
-                              'PLEASE SIGN IN TO CONTINUE',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Lobster',
-                                color: Color.fromARGB(255, 0, 0, 0),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 30.0),
-                              child: Column(
-                                children: [
-                                  TextField(
-                                    controller: phoneCtl,
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      labelText: 'Phone',
-                                      labelStyle: TextStyle(color: Colors.black),
-                                      fillColor: Color(0xFFF0ECF6),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10.0)),
-                                      ),
-                                      contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 20.0, vertical: 16.0),
-                                    ),
-                                    obscureText: true,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  TextField(
-                                    controller: passCtl,
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      labelText: 'Password',
-                                      labelStyle: TextStyle(color: Colors.black),
-                                      fillColor: Color(0xFFF0ECF6),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10.0)),
-                                      ),
-                                      contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 20.0, vertical: 16.0),
-                                    ),
-                                    obscureText: true,
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () => login(context),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 50, vertical: 15),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(25),
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          'Sign in',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text("Don't have an account? "),
-                                      TextButton(
-                                        onPressed: () => register(context),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Colors.transparent,
-                                          padding: EdgeInsets
-                                              .zero, // Background color transparent
-                                        ),
-                                        child: const Text(
-                                          'Sign up',
-                                          style: TextStyle(
-                                            color: Colors
-                                                .blue, // Text color remains blue
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text("Or join us as Duck driver "),
-                                      TextButton(
-                                        onPressed: () {},
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Colors.transparent,
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        child: const Text(
-                                          'Sign up as driver',
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -217,6 +221,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+void register(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Registeruser()),
+    );
+  }
+
+void registerDriver(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Registerdriver()),
+    );
+  }
 // Custom Painter for diagonal background
 class DiagonalPainter extends CustomPainter {
   @override
