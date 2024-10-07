@@ -17,7 +17,7 @@ TextEditingController walletCtl = TextEditingController();
 TextEditingController passwordCtl = TextEditingController();
 TextEditingController phoneCtl = TextEditingController();
 TextEditingController licenseCtl = TextEditingController();
-
+bool _isButtonPressed = false;
 class _RegisterdriverState extends State<Registerdriver> {
   @override
   Widget build(BuildContext context) {
@@ -116,8 +116,17 @@ class _RegisterdriverState extends State<Registerdriver> {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: () {
-                  register(context);
+                onPressed: _isButtonPressed ? null
+                :() async {
+                  setState(() {
+                    _isButtonPressed = true; // เปลี่ยนสถานะเป็นกดแล้ว
+                  });
+                  
+                  register(context); //
+
+                  setState(() {
+                    _isButtonPressed = false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
