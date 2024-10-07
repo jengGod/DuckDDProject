@@ -1,5 +1,8 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
+import 'package:duckddproject/pages/RegisterDriver.dart';
+import 'package:duckddproject/pages/RegisterUser.dart';
+import 'package:duckddproject/pages/UserHome.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -89,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: Column(
                               children: [
                                 TextField(
-                                  controller: emailCtl,
+                                  controller: phoneCtl,
                                   decoration: const InputDecoration(
                                     filled: true,
                                     labelText: 'Email',
@@ -205,14 +208,12 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ),
+          )
         ],
       ),
     );
   }
-  
-  void register(BuildContext context) {
-  
-  }
+
   void login(BuildContext context) {
     Navigator.push(
       context,
