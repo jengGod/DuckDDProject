@@ -130,5 +130,6 @@ class _RegisteruserState extends State<Registeruser> {
 
   void register(BuildContext context) {
     log('user register');
+    //ต่อ register พิมพ์ข้อมูล แล้วให้ลง firebase
   }
 }
