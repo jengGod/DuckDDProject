@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "356125484118",
+    "project_id": "duck-driver-delivery",
+    "storage_bucket": "duck-driver-delivery.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:356125484118:android:cce78a8f7cfd314309c7f7",
+        "android_client_info": {
+          "package_name": "com.example.duckddproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAA3_MIH22FFn8nhqyQNOMvodnNA0I-EQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
