@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "730100601917",
+    "project_id": "ddd-firebase-ae49c",
+    "storage_bucket": "ddd-firebase-ae49c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730100601917:android:f11211304bcd2b1a364654",
+        "android_client_info": {
+          "package_name": "com.example.duckddproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOphYMT2_MpINkHG1Kqhq-WXpBwUT_n3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

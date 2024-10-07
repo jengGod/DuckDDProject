@@ -1,7 +1,12 @@
+import 'package:duckddproject/firebase_options.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+Future<void> main() async{
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
