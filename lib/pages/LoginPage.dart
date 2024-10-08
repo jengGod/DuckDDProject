@@ -4,6 +4,7 @@ import 'package:duckddproject/pages/RegisterDriver.dart';
 import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +16,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController phoneCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
+  bool isLoggingIn = false;
 
   @override
   Widget build(BuildContext contxte) {
@@ -58,159 +60,178 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           children: [
                             Row(
-                               mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 100),
-                              const Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontFamily: 'Lobster',
-                                  fontSize: 38,
-                                  color: Color.fromARGB(255, 255, 255, 255),
-                                ),
-                              ),
-                              Image.network(
-                                'https://s3-alpha-sig.figma.com/img/064a/5671/00d6873be4cfaff05137012a09f47e5b?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=JIqhPBJ6MNG-KtpO~z6EEKjjfguHVd9Jvj27YRgj5gvCNfdWuk0ODKaDNnOb1FNlNfjtBq739R2C3AIcE3tiME8j87uURXX~qwUmh-nycc51CltZoWsT4ghb6HMM5Hk81-bI2nH34QE0t6zeFRXpRyYKbfiGxO-zFXHfvXOX-IHZTdNiog7oJM0QQ3UVL5gHs9Gr6tkQN00LmC0majlu1qLvRuPm-pon0oqpar3LhmmIbqyK39N~NYpoZ5N9XIG3CEd2ab1wdYvVHmK8Cv1JtE4uqd0~0VFt-eOWabTxdxfFrCMLPKWN~JuKym-4S6g~~nnGKWvw3Ttq3Axx2K4qZA__',
-                                width: 100,
-                                height: 65,
-                              ),
-                            ],
-                           ),
-                          
-                          const Text(
-                            'PLEASE SIGN IN TO CONTINUE',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontFamily: 'Lobster',
-                              color: Color.fromARGB(255, 0, 0, 0),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 30.0),
-                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                TextField(
-                                  controller: phoneCtl,
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    labelText: 'Email',
-                                    labelStyle: TextStyle(color: Colors.black),
-                                    fillColor: Color(0xFFF0ECF6),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10.0)),
-                                    ),
-                                    contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 20.0, vertical: 16.0),
-                                  ),
-                                  obscureText: true,
-                                ),
-                                const SizedBox(height: 10),
-                               TextField(
-                                  controller: passCtl,
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    labelText: 'Password',
-                                    labelStyle: TextStyle(color: Colors.black),
-                                    fillColor: Color(0xFFF0ECF6),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10.0)),
-                                    ),
-                                    contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 20.0, vertical: 16.0),
-                                  ),
-                                  obscureText: true,
-                                ),
-                                const SizedBox(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    ElevatedButton(
-                                  onPressed: () => login(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 50, vertical: 15),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Sign in',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                    ),
+                                const SizedBox(height: 100),
+                                const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontFamily: 'Lobster',
+                                    fontSize: 38,
+                                    color: Color.fromARGB(255, 255, 255, 255),
                                   ),
                                 ),
-                                  ],
-                                ),
-                                
-                                const SizedBox(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text("Don't have an account? "),
-                                    TextButton(
-                                      onPressed:() => register(context),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.transparent,
-                                        padding: EdgeInsets
-                                            .zero, // Background color transparent
-                                      ),
-                                      child: const Text(
-                                        'Sign up',
-                                        style: TextStyle(
-                                          color: Colors
-                                              .blue, // Text color remains blue
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text("Or join us as Duck driver "),
-                                    TextButton(
-                                      onPressed: () => registerDriver(context),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.transparent,
-                                        padding: EdgeInsets
-                                            .zero, 
-                                      ),
-                                      child: const Text(
-                                        'Sign up as driver',
-                                        style: TextStyle(
-                                          color: Colors
-                                              .blue, 
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                Image.network(
+                                  'https://s3-alpha-sig.figma.com/img/064a/5671/00d6873be4cfaff05137012a09f47e5b?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=JIqhPBJ6MNG-KtpO~z6EEKjjfguHVd9Jvj27YRgj5gvCNfdWuk0ODKaDNnOb1FNlNfjtBq739R2C3AIcE3tiME8j87uURXX~qwUmh-nycc51CltZoWsT4ghb6HMM5Hk81-bI2nH34QE0t6zeFRXpRyYKbfiGxO-zFXHfvXOX-IHZTdNiog7oJM0QQ3UVL5gHs9Gr6tkQN00LmC0majlu1qLvRuPm-pon0oqpar3LhmmIbqyK39N~NYpoZ5N9XIG3CEd2ab1wdYvVHmK8Cv1JtE4uqd0~0VFt-eOWabTxdxfFrCMLPKWN~JuKym-4S6g~~nnGKWvw3Ttq3Axx2K4qZA__',
+                                  width: 100,
+                                  height: 65,
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                            const Text(
+                              'PLEASE SIGN IN TO CONTINUE',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontFamily: 'Lobster',
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 30.0),
+                              child: Column(
+                                children: [
+                                  TextField(
+                                    controller: phoneCtl,
+                                    decoration: const InputDecoration(
+                                      filled: true,
+                                      labelText: 'Email',
+                                      labelStyle:
+                                          TextStyle(color: Colors.black),
+                                      fillColor: Color(0xFFF0ECF6),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10.0)),
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 16.0),
+                                    ),
+                                    obscureText: true,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.deny(RegExp(
+                                          r'\s')), // ป้องกันการป้อน Space
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  TextField(
+                                    controller: passCtl,
+                                    decoration: const InputDecoration(
+                                      filled: true,
+                                      labelText: 'Password',
+                                      labelStyle:
+                                          TextStyle(color: Colors.black),
+                                      fillColor: Color(0xFFF0ECF6),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10.0)),
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20.0, vertical: 16.0),
+                                    ),
+                                    obscureText: true,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: isLoggingIn
+                                            ? null
+                                            : () => login(
+                                                context), // ป้องกันการกดปุ่มซ้ำ
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.black,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 50, vertical: 15),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Sign in',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text("Don't have an account? "),
+                                      TextButton(
+                                        onPressed: () => register(context),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.transparent,
+                                          padding: EdgeInsets
+                                              .zero, // Background color transparent
+                                        ),
+                                        child: const Text(
+                                          'Sign up',
+                                          style: TextStyle(
+                                            color: Colors
+                                                .blue, // Text color remains blue
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text("Or join us as Duck driver "),
+                                      TextButton(
+                                        onPressed: () =>
+                                            registerDriver(context),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.transparent,
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        child: const Text(
+                                          'Sign up as driver',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
           )
         ],
       ),
     );
   }
 
-  void login(BuildContext context) {
+  void login(BuildContext context) async {
+    setState(() {
+      isLoggingIn = true; // ตั้งค่าตัวแปรว่าเริ่มล็อกอิน
+    });
+
+    // จำลองการดำเนินการล็อกอิน (แทนที่ด้วยการเรียก API ของคุณ)
+    await Future.delayed(Duration(seconds: 2));
+
+    // หลังจากล็อกอินเสร็จสิ้น
+    setState(() {
+      isLoggingIn = false; // เปลี่ยนสถานะเป็นไม่ล็อกอิน
+    });
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UserHomePage()),
@@ -219,18 +240,19 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 void register(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Registeruser()),
-    );
-  }
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => Registeruser()),
+  );
+}
 
 void registerDriver(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Registerdriver()),
-    );
-  }
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => Registerdriver()),
+  );
+}
+
 // Custom Painter for diagonal background
 class DiagonalPainter extends CustomPainter {
   @override
@@ -265,5 +287,4 @@ class DiagonalPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
   }
-  
 }
