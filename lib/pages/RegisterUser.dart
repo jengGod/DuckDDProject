@@ -1,9 +1,9 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 class Registeruser extends StatefulWidget {
   const Registeruser({super.key});
 
@@ -19,8 +19,33 @@ TextEditingController passwordCtl = TextEditingController();
 TextEditingController phoneCtl = TextEditingController();
 
 bool _isButtonPressed = false;
+XFile? image;
+final ImagePicker picker = ImagePicker();
 
 class _RegisteruserState extends State<Registeruser> {
+  bool _isButtonPressed = false;
+
+  // ตรวจสอบว่าข้อมูลกรอกครบทุกช่องหรือยัง
+  bool _isFormComplete() {
+    return usernameCtl.text.isNotEmpty &&
+           emailCtl.text.isNotEmpty &&
+           phoneCtl.text.isNotEmpty &&
+           passwordCtl.text.isNotEmpty &&
+           passCtl.text.isNotEmpty;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ตรวจสอบการเปลี่ยนแปลงของแต่ละ TextField เมื่อมีการกรอกข้อมูล
+    usernameCtl.addListener(() => setState(() {}));
+    emailCtl.addListener(() => setState(() {}));
+    phoneCtl.addListener(() => setState(() {}));
+    passwordCtl.addListener(() => setState(() {}));
+    passCtl.addListener(() => setState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,8 +59,24 @@ class _RegisteruserState extends State<Registeruser> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              FilledButton(
+                  onPressed: () async {
+                    log('start:');
+                    final ImagePicker picker = ImagePicker();
+                    image = await picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      log('image:');
+                      log(image!.path);
+                      setState(() {});
+                    }
+                  },
+                  child: const Text('Profile picture')),
+              const SizedBox(height: 30),
               TextField(
                 controller: usernameCtl,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Username',
                   filled: true,
@@ -50,6 +91,9 @@ class _RegisteruserState extends State<Registeruser> {
               TextField(
                 controller: emailCtl,
                 keyboardType: TextInputType.emailAddress,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   filled: true,
@@ -63,9 +107,12 @@ class _RegisteruserState extends State<Registeruser> {
               const SizedBox(height: 20),
               TextField(
                 controller: phoneCtl,
-                obscureText: true,
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                ],
                 decoration: const InputDecoration(
-                  labelText: 'Phonenumber',
+                  labelText: 'Phone number',
                   filled: true,
                   fillColor: Color(0xFFF0ECF6),
                   border: OutlineInputBorder(
@@ -78,6 +125,9 @@ class _RegisteruserState extends State<Registeruser> {
               TextField(
                 controller: passwordCtl,
                 obscureText: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Password',
                   filled: true,
@@ -92,6 +142,9 @@ class _RegisteruserState extends State<Registeruser> {
               TextField(
                 controller: passCtl,
                 obscureText: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Confirm Password',
                   filled: true,
@@ -104,18 +157,20 @@ class _RegisteruserState extends State<Registeruser> {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: _isButtonPressed ? null
-                :() async {
-                  setState(() {
-                    _isButtonPressed = true; // เปลี่ยนสถานะเป็นกดแล้ว
-                  });
-                  
-                  register(context); //
+                // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
+                onPressed: !_isFormComplete() || _isButtonPressed
+                    ? null // ปุ่มถูกปิดหากยังกรอกข้อมูลไม่ครบหรือปุ่มถูกกดแล้ว
+                    : () async {
+                        setState(() {
+                          _isButtonPressed = true; // เปลี่ยนสถานะเป็นกดแล้ว
+                        });
 
-                  setState(() {
-                    _isButtonPressed = false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
-                  });
-                },
+                        register(context); //
+
+                        setState(() {
+                          _isButtonPressed = false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
+                        });
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   padding:
@@ -140,20 +195,30 @@ class _RegisteruserState extends State<Registeruser> {
   }
 
   void register(BuildContext context) {
-    log('user register');
-    var db = FirebaseFirestore.instance;
+    if (passwordCtl.text != passCtl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
 
+    var db = FirebaseFirestore.instance;
     var data = {
       'username': usernameCtl.text,
       'email': emailCtl.text,
       'phonenumber': phoneCtl.text,
-      'password': passCtl.text
+      'password': passwordCtl.text,
     };
-    db.collection('User').doc(usernameCtl.text).set(data);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
+    db.collection('User').doc(usernameCtl.text).set(data).then((_) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    });
   }
 }
