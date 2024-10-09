@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -61,19 +63,6 @@ class _RegisteruserState extends State<Registeruser> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              FilledButton(
-                  onPressed: () async {
-                    log('start:');
-                    final ImagePicker picker = ImagePicker();
-                    image = await picker.pickImage(source: ImageSource.gallery);
-                    if (image != null) {
-                      log('image:');
-                      log(image!.path);
-                      setState(() {});
-                    }
-                  },
-                  child: const Text('Profile picture')),
-              const SizedBox(height: 30),
               TextField(
                 controller: usernameCtl,
                 inputFormatters: [
@@ -158,6 +147,18 @@ class _RegisteruserState extends State<Registeruser> {
                 ),
               ),
               const SizedBox(height: 30),
+              FilledButton(
+                  onPressed: () async {
+                    log('start:');
+                    final ImagePicker picker = ImagePicker();
+                    image = await picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      log('image:');
+                      log(image!.path);
+                    }
+                  },
+                  child: const Text('Profile picture')),
+              const SizedBox(height: 30),
               ElevatedButton(
                 // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
                 onPressed: !_isFormComplete() || _isButtonPressed
@@ -196,6 +197,21 @@ class _RegisteruserState extends State<Registeruser> {
     );
   }
 
+  Future<String> uploadImage(XFile image) async {
+    // สร้าง Reference สำหรับ Firebase Storage
+    final storageRef = FirebaseStorage.instance.ref();
+    
+    // สร้าง path สำหรับเก็บรูปภาพ
+    final imageRef = storageRef.child('profile_pictures/${image.name}');
+
+    // อัปโหลดรูปภาพ
+    await imageRef.putFile(File(image.path));
+
+    // รับ URL ของรูปภาพที่ถูกอัปโหลด
+    String downloadURL = await imageRef.getDownloadURL();
+    return downloadURL;
+  }
+
   void register(BuildContext context) async{
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
     if (passwordCtl.text != passCtl.text) {
@@ -204,7 +220,7 @@ class _RegisteruserState extends State<Registeruser> {
       );
       return;
     }
-
+    String imageUrl = await uploadImage(image!);
     DocumentSnapshot userDoc = await firestore.collection('Users').doc(emailCtl.text).get();
 
     if (userDoc.exists) {
@@ -220,6 +236,7 @@ class _RegisteruserState extends State<Registeruser> {
       'email': emailCtl.text,
       'phonenumber': phoneCtl.text,
       'password': hashedPassword,
+      'profile_picture': imageUrl
     };
 
     db.collection('Users').doc(emailCtl.text).set(data).then((_) {
