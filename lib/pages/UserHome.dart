@@ -1,4 +1,5 @@
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:duckddproject/pages/Receivepackge.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:duckddproject/pages/sendpackage.dart';
@@ -150,10 +151,17 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  void send(BuildContext context) { Navigator.push(
+  void send(BuildContext context) {
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SendPage()),
-    );}
+    );
+  }
     
-  void receive(BuildContext context) {}
+  void receive(BuildContext context) {
+     Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Receciveuser()),
+    );
+  }
 }
