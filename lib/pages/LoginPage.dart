@@ -1,5 +1,10 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/RegisterDriver.dart';
 import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:duckddproject/pages/UserHome.dart';
@@ -14,7 +19,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController phoneCtl = TextEditingController();
+  TextEditingController emailCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
   bool isLoggingIn = false;
 
@@ -93,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: Column(
                                 children: [
                                   TextField(
-                                    controller: phoneCtl,
+                                    controller: emailCtl,
                                     decoration: const InputDecoration(
                                       filled: true,
                                       labelText: 'Email',
@@ -219,23 +224,38 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void login(BuildContext context) async {
-    setState(() {
-      isLoggingIn = true; // ตั้งค่าตัวแปรว่าเริ่มล็อกอิน
-    });
+  Future<void> login(BuildContext context) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    String hashedPassword =
+        sha256.convert(utf8.encode(passCtl.text)).toString();
+    try {
+      // ตรวจสอบข้อมูลใน Firestore
+      DocumentSnapshot userDoc =
+          await firestore.collection('Users').doc(emailCtl.text).get();
 
-    // จำลองการดำเนินการล็อกอิน (แทนที่ด้วยการเรียก API ของคุณ)
-    await Future.delayed(Duration(seconds: 2));
-
-    // หลังจากล็อกอินเสร็จสิ้น
-    setState(() {
-      isLoggingIn = false; // เปลี่ยนสถานะเป็นไม่ล็อกอิน
-    });
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UserHomePage()),
-    );
+      if (userDoc.exists) {
+        // ตรวจสอบรหัสผ่าน
+        if (userDoc['password'] == hashedPassword) {
+          log('Login successful!');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserHomePage()),
+          );
+        } else {
+          log('Incorrect password.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Incorrect password')),
+          );
+        }
+      } else {
+        log('No user found with that email.');
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No user found with that email.')),
+        );
+      }
+    } catch (e) {
+      log('Error: $e');
+    }
   }
 }
 

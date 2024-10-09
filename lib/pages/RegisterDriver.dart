@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // สำหรับการกรอง input
 import 'package:image_picker/image_picker.dart';// สำหรับการเลือกรูปภาพ
-
+import 'package:firebase_storage/firebase_storage.dart'; // สำหรับการใช้ XFile
 class Registerdriver extends StatefulWidget {
   const Registerdriver({super.key});
 
@@ -177,7 +180,6 @@ class _RegisterdriverState extends State<Registerdriver> {
                     if (image != null) {
                       log('image:');
                       log(image!.path);
-                      setState(() {});
                     }
                   },
                   child: const Text('Profile picture')),
@@ -227,20 +229,50 @@ class _RegisterdriverState extends State<Registerdriver> {
     );
   }
 
-  void register(BuildContext context) {
-    log('Driver registered');
+    Future<String> uploadImage(XFile image) async {
+    // สร้าง Reference สำหรับ Firebase Storage
+    final storageRef = FirebaseStorage.instance.ref();
+    
+    // สร้าง path สำหรับเก็บรูปภาพ
+    final imageRef = storageRef.child('profile_pictures/${image.name}');
 
+    // อัปโหลดรูปภาพ
+    await imageRef.putFile(File(image.path));
+
+    // รับ URL ของรูปภาพที่ถูกอัปโหลด
+    String downloadURL = await imageRef.getDownloadURL();
+    return downloadURL;
+  }
+
+  void register(BuildContext context) async{
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    if (passwordCtl.text != passCtl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+    String imageUrl = await uploadImage(image!);
+    DocumentSnapshot userDoc = await firestore.collection('Drivers').doc(emailCtl.text).get();
+
+    if (userDoc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email already exists. Please use another email.')),
+      );
+      return; // หยุดการสมัครสมาชิก
+    }
+    String hashedPassword = sha256.convert(utf8.encode(passwordCtl.text)).toString();
     var db = FirebaseFirestore.instance;
     var data = {
       'username': usernameCtl.text,
       'email': emailCtl.text,
       'phonenumber': phoneCtl.text,
       'license': licenseCtl.text,
-      'password': passwordCtl.text,
-      'profile_picture': image
+      'password': hashedPassword,
+      'profile_picture': imageUrl
     };
 
-    db.collection('Driver').doc(usernameCtl.text).set(data).then((_) {
+    db.collection('Drivers').doc(emailCtl.text).set(data).then((_) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),

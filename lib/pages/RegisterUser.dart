@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:crypto/crypto.dart';
 class Registeruser extends StatefulWidget {
   const Registeruser({super.key});
 
@@ -194,7 +196,8 @@ class _RegisteruserState extends State<Registeruser> {
     );
   }
 
-  void register(BuildContext context) {
+  void register(BuildContext context) async{
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
     if (passwordCtl.text != passCtl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match')),
@@ -202,15 +205,24 @@ class _RegisteruserState extends State<Registeruser> {
       return;
     }
 
+    DocumentSnapshot userDoc = await firestore.collection('Users').doc(emailCtl.text).get();
+
+    if (userDoc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email already exists. Please use another email.')),
+      );
+      return; // หยุดการสมัครสมาชิก
+    }
+    String hashedPassword = sha256.convert(utf8.encode(passwordCtl.text)).toString();
     var db = FirebaseFirestore.instance;
     var data = {
       'username': usernameCtl.text,
       'email': emailCtl.text,
       'phonenumber': phoneCtl.text,
-      'password': passwordCtl.text,
+      'password': hashedPassword,
     };
 
-    db.collection('User').doc(usernameCtl.text).set(data).then((_) {
+    db.collection('Users').doc(emailCtl.text).set(data).then((_) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
