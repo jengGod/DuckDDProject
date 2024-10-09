@@ -3,16 +3,26 @@ import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:duckddproject/pages/sendpackage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserHomePage extends StatefulWidget {
   const UserHomePage({super.key});
-
   @override
   State<UserHomePage> createState() => _UserHomePageState();
 }
 
 class _UserHomePageState extends State<UserHomePage> {
   int selectedIndex = 0;
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +137,7 @@ class _UserHomePageState extends State<UserHomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Logout'),
-          content: const Text('Do you want to logout?'),
+          content:  const Text('Do you want to logout?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -137,10 +147,7 @@ class _UserHomePageState extends State<UserHomePage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()), // นำทางไปยังหน้า LoginPage
-                );
+                logout(context);
               },
               child: const Text('Logout'),
             ),
@@ -156,4 +163,25 @@ class _UserHomePageState extends State<UserHomePage> {
     );}
     
   void receive(BuildContext context) {}
+
+   Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+    });
+  }
+
+  Future<void> logout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ลบข้อมูลผู้ใช้ทั้งหมดใน SharedPreferences
+    await prefs.clear(); 
+    // เปลี่ยนหน้ากลับไปยังหน้าล็อกอิน
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
 }

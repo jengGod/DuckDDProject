@@ -42,7 +42,7 @@ class _SendPageState extends State<SendPage> {
                 if (selectedIndex == 0) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const UserHomePage()),
+                    MaterialPageRoute(builder: (context) => UserHomePage()),
                   );
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
