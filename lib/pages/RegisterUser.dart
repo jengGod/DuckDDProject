@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crypto/crypto.dart';
+
 class Registeruser extends StatefulWidget {
   const Registeruser({super.key});
 
@@ -25,17 +26,17 @@ TextEditingController phoneCtl = TextEditingController();
 bool _isButtonPressed = false;
 XFile? image;
 final ImagePicker picker = ImagePicker();
+String imageUrl = '';
 
 class _RegisteruserState extends State<Registeruser> {
-  bool _isButtonPressed = false;
-
   // ตรวจสอบว่าข้อมูลกรอกครบทุกช่องหรือยัง
   bool _isFormComplete() {
     return usernameCtl.text.isNotEmpty &&
-           emailCtl.text.isNotEmpty &&
-           phoneCtl.text.isNotEmpty &&
-           passwordCtl.text.isNotEmpty &&
-           passCtl.text.isNotEmpty;
+        emailCtl.text.isNotEmpty &&
+        phoneCtl.text.isNotEmpty &&
+        passwordCtl.text.isNotEmpty &&
+        passCtl.text.isNotEmpty &&
+        image != null;
   }
 
   @override
@@ -66,7 +67,8 @@ class _RegisteruserState extends State<Registeruser> {
               TextField(
                 controller: usernameCtl,
                 inputFormatters: [
-                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
                 decoration: const InputDecoration(
                   labelText: 'Username',
@@ -83,7 +85,8 @@ class _RegisteruserState extends State<Registeruser> {
                 controller: emailCtl,
                 keyboardType: TextInputType.emailAddress,
                 inputFormatters: [
-                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
                 decoration: const InputDecoration(
                   labelText: 'Email',
@@ -100,7 +103,8 @@ class _RegisteruserState extends State<Registeruser> {
                 controller: phoneCtl,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
-                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
                 decoration: const InputDecoration(
                   labelText: 'Phone number',
@@ -117,7 +121,8 @@ class _RegisteruserState extends State<Registeruser> {
                 controller: passwordCtl,
                 obscureText: true,
                 inputFormatters: [
-                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
                 decoration: const InputDecoration(
                   labelText: 'Password',
@@ -134,7 +139,8 @@ class _RegisteruserState extends State<Registeruser> {
                 controller: passCtl,
                 obscureText: true,
                 inputFormatters: [
-                  FilteringTextInputFormatter.deny(RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
                 decoration: const InputDecoration(
                   labelText: 'Confirm Password',
@@ -155,9 +161,25 @@ class _RegisteruserState extends State<Registeruser> {
                     if (image != null) {
                       log('image:');
                       log(image!.path);
+                      imageUrl = await uploadImage(image!);
+                      setState(() {});
                     }
                   },
-                  child: const Text('Profile picture')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Profile picture',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  )),
               const SizedBox(height: 30),
               ElevatedButton(
                 // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
@@ -171,7 +193,8 @@ class _RegisteruserState extends State<Registeruser> {
                         register(context); //
 
                         setState(() {
-                          _isButtonPressed = false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
+                          _isButtonPressed =
+                              false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
                         });
                       },
                 style: ElevatedButton.styleFrom(
@@ -200,7 +223,7 @@ class _RegisteruserState extends State<Registeruser> {
   Future<String> uploadImage(XFile image) async {
     // สร้าง Reference สำหรับ Firebase Storage
     final storageRef = FirebaseStorage.instance.ref();
-    
+
     // สร้าง path สำหรับเก็บรูปภาพ
     final imageRef = storageRef.child('profile_pictures/${image.name}');
 
@@ -212,24 +235,30 @@ class _RegisteruserState extends State<Registeruser> {
     return downloadURL;
   }
 
-  void register(BuildContext context) async{
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  void register(BuildContext context) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
     if (passwordCtl.text != passCtl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match')),
       );
       return;
     }
-    String imageUrl = await uploadImage(image!);
-    DocumentSnapshot userDoc = await firestore.collection('Users').doc(emailCtl.text).get();
 
-    if (userDoc.exists) {
+    DocumentSnapshot userDoc =
+        await firestore.collection('Users').doc(phoneCtl.text).get();
+    DocumentSnapshot driverDoc =
+        await firestore.collection('Drivers').doc(phoneCtl.text).get();
+
+    if (userDoc.exists || driverDoc.exists) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email already exists. Please use another email.')),
+        const SnackBar(
+            content: Text(
+                'Phone number already exists. Please use another Phone number.')),
       );
       return; // หยุดการสมัครสมาชิก
     }
-    String hashedPassword = sha256.convert(utf8.encode(passwordCtl.text)).toString();
+    String hashedPassword =
+        sha256.convert(utf8.encode(passwordCtl.text)).toString();
     var db = FirebaseFirestore.instance;
     var data = {
       'username': usernameCtl.text,
@@ -239,8 +268,8 @@ class _RegisteruserState extends State<Registeruser> {
       'profile_picture': imageUrl
     };
 
-    db.collection('Users').doc(emailCtl.text).set(data).then((_) {
-      Navigator.push(
+    db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
+      Navigator.pop(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );

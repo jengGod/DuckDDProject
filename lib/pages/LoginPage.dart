@@ -19,7 +19,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailCtl = TextEditingController();
+  TextEditingController phoneCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
   bool isLoggingIn = false;
 
@@ -98,10 +98,10 @@ class _LoginPageState extends State<LoginPage> {
                               child: Column(
                                 children: [
                                   TextField(
-                                    controller: emailCtl,
+                                    controller: phoneCtl,
                                     decoration: const InputDecoration(
                                       filled: true,
-                                      labelText: 'Email',
+                                      labelText: 'Phone number',
                                       labelStyle:
                                           TextStyle(color: Colors.black),
                                       fillColor: Color(0xFFF0ECF6),
@@ -230,8 +230,8 @@ class _LoginPageState extends State<LoginPage> {
         sha256.convert(utf8.encode(passCtl.text)).toString();
     try {
       // ตรวจสอบข้อมูลใน Firestore
-      DocumentSnapshot userDoc =
-          await firestore.collection('Users').doc(emailCtl.text).get();
+      DocumentSnapshot userDoc = await firestore.collection('Users').doc(phoneCtl.text).get();
+      DocumentSnapshot driverDoc = await firestore.collection('Drivers').doc(phoneCtl.text).get();
 
       if (userDoc.exists) {
         // ตรวจสอบรหัสผ่าน
@@ -247,10 +247,23 @@ class _LoginPageState extends State<LoginPage> {
             const SnackBar(content: Text('Incorrect password')),
           );
         }
+      }else if(driverDoc.exists){
+        if (driverDoc['password'] == hashedPassword) {
+          log('Login successful!');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const UserHomePage()),
+          );
+        } else {
+          log('Incorrect password.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Incorrect password')),
+          );
+        }
       } else {
-        log('No user found with that email.');
+        log('No user found with that Phonenumber.');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No user found with that email.')),
+            const SnackBar(content: Text('No user found with that Phonenumber.')),
         );
       }
     } catch (e) {

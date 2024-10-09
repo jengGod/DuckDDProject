@@ -6,8 +6,9 @@ import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // สำหรับการกรอง input
-import 'package:image_picker/image_picker.dart';// สำหรับการเลือกรูปภาพ
+import 'package:image_picker/image_picker.dart'; // สำหรับการเลือกรูปภาพ
 import 'package:firebase_storage/firebase_storage.dart'; // สำหรับการใช้ XFile
+
 class Registerdriver extends StatefulWidget {
   const Registerdriver({super.key});
 
@@ -24,6 +25,7 @@ TextEditingController phoneCtl = TextEditingController();
 TextEditingController licenseCtl = TextEditingController();
 bool _isButtonPressed = false;
 XFile? image; // สำหรับการจัดการรูปภาพที่เลือก
+String imageUrl = '';
 
 class _RegisterdriverState extends State<Registerdriver> {
   final ImagePicker picker = ImagePicker();
@@ -180,9 +182,25 @@ class _RegisterdriverState extends State<Registerdriver> {
                     if (image != null) {
                       log('image:');
                       log(image!.path);
+                      imageUrl = await uploadImage(image!);
+                      setState(() {});
                     }
                   },
-                  child: const Text('Profile picture')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Profile picture',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  )),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: !_isFormComplete() || _isButtonPressed
@@ -229,10 +247,10 @@ class _RegisterdriverState extends State<Registerdriver> {
     );
   }
 
-    Future<String> uploadImage(XFile image) async {
+  Future<String> uploadImage(XFile image) async {
     // สร้าง Reference สำหรับ Firebase Storage
     final storageRef = FirebaseStorage.instance.ref();
-    
+
     // สร้าง path สำหรับเก็บรูปภาพ
     final imageRef = storageRef.child('profile_pictures/${image.name}');
 
@@ -244,7 +262,7 @@ class _RegisterdriverState extends State<Registerdriver> {
     return downloadURL;
   }
 
-  void register(BuildContext context) async{
+  void register(BuildContext context) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     if (passwordCtl.text != passCtl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -252,16 +270,20 @@ class _RegisterdriverState extends State<Registerdriver> {
       );
       return;
     }
-    String imageUrl = await uploadImage(image!);
-    DocumentSnapshot userDoc = await firestore.collection('Drivers').doc(emailCtl.text).get();
-
-    if (userDoc.exists) {
+    DocumentSnapshot driverDoc =
+        await firestore.collection('Drivers').doc(phoneCtl.text).get();
+    DocumentSnapshot userDoc =
+        await firestore.collection('Users').doc(phoneCtl.text).get();
+    if (driverDoc.exists || userDoc.exists) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email already exists. Please use another email.')),
+        const SnackBar(
+            content: Text(
+                'Phone number already exists. Please use another Phone number.')),
       );
       return; // หยุดการสมัครสมาชิก
     }
-    String hashedPassword = sha256.convert(utf8.encode(passwordCtl.text)).toString();
+    String hashedPassword =
+        sha256.convert(utf8.encode(passwordCtl.text)).toString();
     var db = FirebaseFirestore.instance;
     var data = {
       'username': usernameCtl.text,
@@ -272,8 +294,8 @@ class _RegisterdriverState extends State<Registerdriver> {
       'profile_picture': imageUrl
     };
 
-    db.collection('Drivers').doc(emailCtl.text).set(data).then((_) {
-      Navigator.push(
+    db.collection('Drivers').doc(phoneCtl.text).set(data).then((_) {
+      Navigator.pop(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );
