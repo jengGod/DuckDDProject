@@ -1,3 +1,4 @@
+import 'package:duckddproject/pages/checkrecivemore.dart';
 import 'package:flutter/material.dart';
 import 'LoginPage.dart';
 import 'UserHome.dart';
@@ -32,13 +33,25 @@ class _RececiveuserState extends State<Receciveuser> {
         child: BottomNavigationBar(
           backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-            BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: 'list',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout),
+              label: 'Logout',
+            ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: Colors.black, // Selected item color
+          selectedItemColor: const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
             if (index == 3) {
@@ -65,6 +78,7 @@ class _RececiveuserState extends State<Receciveuser> {
               });
             }
           },
+          type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
       body: Padding(
@@ -120,7 +134,9 @@ class _RececiveuserState extends State<Receciveuser> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        More(context);
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.black,
                                       ),
@@ -176,6 +192,13 @@ class _RececiveuserState extends State<Receciveuser> {
           ],
         );
       },
+    );
+  }
+  
+  void More(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Checkmore()),
     );
   }
 }

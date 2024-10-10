@@ -25,13 +25,25 @@ class _SendPageState extends State<SendPage> {
         child: BottomNavigationBar(
           backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-            BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: 'list',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout),
+              label: 'Logout',
+            ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: Colors.black, // Selected item color
+          selectedItemColor: const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
             if (index == 3) {
@@ -58,6 +70,7 @@ class _SendPageState extends State<SendPage> {
               });
             }
           },
+          type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
       body: Padding(
