@@ -12,29 +12,47 @@ class Packagelist extends StatefulWidget {
 
 class _PackagelistState extends State<Packagelist> {
   int selectedIndex = 1;
+  final List<Map<String, String?>> packages = [
+    {"name": "STATUS", "status": "search for driver"},
+    {"name": "STATUS", "status": "pickup package"},
+    {"name": "STATUS", "status": "delivering"},
+    {"name": "STATUS", "status": "delivered"},
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // ตั้งค่าสีพื้นหลังเป็นสีเหลือง
+          backgroundColor: const Color.fromARGB(255, 252, 227, 3),
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-            BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: 'list',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout),
+              label: 'Logout',
+            ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: Colors.black, // สีของไอเท็มที่ถูกเลือก
-          unselectedItemColor: Colors.black, // สีของไอเท็มที่ไม่ได้ถูกเลือก
+          selectedItemColor: const Color.fromARGB(255, 110, 112, 110),
+          unselectedItemColor: Colors.black,
           onTap: (int index) {
-            if (index == 3) { // ถ้าเป็น Logout
+            if (index == 3) {
               _showLogoutDialog(context);
             } else {
               setState(() {
                 selectedIndex = index;
-                // นำทางไปยังหน้าต่าง ๆ เมื่อไอคอนถูกกด
                 if (selectedIndex == 0) {
                   Navigator.pushReplacement(
                     context,
@@ -54,11 +72,102 @@ class _PackagelistState extends State<Packagelist> {
               });
             }
           },
+          type: BottomNavigationBarType.fixed,
         ),
       ),
-      body: const Text('page'),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: packages.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Card(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      elevation: 4,
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              color: const Color.fromARGB(255, 252, 227, 3),
+                              width: 120,
+                              height: 120,
+                              child: const Icon(Icons.image, size: 50),
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Card(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      packages[index]['name'] ?? 'No Name', // ใช้ ?? เพื่อจัดการกับค่า null
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      packages[index]['status'] ?? 'No Status', // ใช้ ?? เพื่อจัดการกับค่า null
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              More(context);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.black,
+                                            ),
+                                            child: const Text(
+                                              'more',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -69,7 +178,7 @@ class _PackagelistState extends State<Packagelist> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
@@ -87,4 +196,6 @@ class _PackagelistState extends State<Packagelist> {
       },
     );
   }
+
+  void More(BuildContext context) {}
 }
