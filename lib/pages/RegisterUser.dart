@@ -6,6 +6,7 @@ import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crypto/crypto.dart';
 
@@ -24,6 +25,7 @@ TextEditingController passwordCtl = TextEditingController();
 TextEditingController phoneCtl = TextEditingController();
 
 bool _isButtonPressed = false;
+bool isLocationChecked = false;
 XFile? image;
 final ImagePicker picker = ImagePicker();
 String imageUrl = '';
@@ -64,6 +66,34 @@ class _RegisteruserState extends State<Registeruser> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              FilledButton(
+                  onPressed: () async {
+                    log('start:');
+                    final ImagePicker picker = ImagePicker();
+                    image = await picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      log('image:');
+                      log(image!.path);
+                      imageUrl = await uploadImage(image!);
+                      setState(() {});
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Profile picture',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  )),
+              const SizedBox(height: 20),
               TextField(
                 controller: usernameCtl,
                 inputFormatters: [
@@ -152,35 +182,18 @@ class _RegisteruserState extends State<Registeruser> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
-              FilledButton(
-                  onPressed: () async {
-                    log('start:');
-                    final ImagePicker picker = ImagePicker();
-                    image = await picker.pickImage(source: ImageSource.gallery);
-                    if (image != null) {
-                      log('image:');
-                      log(image!.path);
-                      imageUrl = await uploadImage(image!);
-                      setState(() {});
+              CheckboxListTile(
+                  title: const Text('ใช้ตำแหน่งปัจจุบันเป็นที่อยู่'),
+                  value: isLocationChecked,
+                  onChanged: (bool? value) async {
+                    setState(() {
+                      isLocationChecked = value ?? false;
+                    });
+                    if (isLocationChecked) {
+                      var position = await _determinePosition();
+                      log('${position.latitude} ${position.longitude}');
                     }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text(
-                    'Profile picture',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-              const SizedBox(height: 30),
+                  }),
               ElevatedButton(
                 // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
                 onPressed: !_isFormComplete() || _isButtonPressed
@@ -278,5 +291,42 @@ class _RegisteruserState extends State<Registeruser> {
         SnackBar(content: Text('Error: $error')),
       );
     });
+  }
+
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
   }
 }
