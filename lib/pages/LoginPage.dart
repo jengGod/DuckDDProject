@@ -10,6 +10,7 @@ import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -230,16 +231,22 @@ class _LoginPageState extends State<LoginPage> {
         sha256.convert(utf8.encode(passCtl.text)).toString();
     try {
       // ตรวจสอบข้อมูลใน Firestore
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       DocumentSnapshot userDoc = await firestore.collection('Users').doc(phoneCtl.text).get();
       DocumentSnapshot driverDoc = await firestore.collection('Drivers').doc(phoneCtl.text).get();
 
       if (userDoc.exists) {
         // ตรวจสอบรหัสผ่าน
         if (userDoc['password'] == hashedPassword) {
+          var userData = userDoc.data() as Map<String, dynamic>;
+          await prefs.setString('username', userData['username']);
+          await prefs.setString('email', userData['email']);
+          await prefs.setString('phonenumber', userData['phonenumber']);
+          await prefs.setString('profile_picture', userData['profile_picture']);
           log('Login successful!');
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const UserHomePage()),
+            MaterialPageRoute(builder: (context) => UserHomePage()),
           );
         } else {
           log('Incorrect password.');
@@ -252,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
           log('Login successful!');
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const UserHomePage()),
+            MaterialPageRoute(builder: (context) =>  UserHomePage()),
           );
         } else {
           log('Incorrect password.');
