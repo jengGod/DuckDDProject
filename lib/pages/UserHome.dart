@@ -177,5 +177,7 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
     
-  void receive(BuildContext context) {}
+  void receive(BuildContext context) {
+    
+  }
 }
