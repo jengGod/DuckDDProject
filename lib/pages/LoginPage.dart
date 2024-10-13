@@ -256,10 +256,15 @@ class _LoginPageState extends State<LoginPage> {
         }
       }else if(driverDoc.exists){
         if (driverDoc['password'] == hashedPassword) {
+          var driverData = driverDoc .data() as Map<String, dynamic>;
+          await prefs.setString('username', driverData['username']);
+          await prefs.setString('email', driverData['email']);
+          await prefs.setString('phonenumber', driverData['phonenumber']);
+          await prefs.setString('profile_picture', driverData['profile_picture']);
           log('Login successful!');
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) =>  UserHomePage()),
+            MaterialPageRoute(builder: (context) => UserHomePage()),//--------------------**
           );
         } else {
           log('Incorrect password.');
