@@ -170,14 +170,31 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  void send(BuildContext context) {
-    Navigator.push(
+  void send(BuildContext context) { Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SendPage()),
-    );
+    );}
+    
+  void receive(BuildContext context) {}
+
+   Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+    });
   }
-    
-  void receive(BuildContext context) {
-    
+
+  Future<void> logout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ลบข้อมูลผู้ใช้ทั้งหมดใน SharedPreferences
+    await prefs.clear(); 
+    // เปลี่ยนหน้ากลับไปยังหน้าล็อกอิน
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 }
