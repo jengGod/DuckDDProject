@@ -29,7 +29,8 @@ bool isLocationChecked = false;
 XFile? image;
 final ImagePicker picker = ImagePicker();
 String imageUrl = '';
-
+double lati=0;
+double long=0;
 class _RegisteruserState extends State<Registeruser> {
   // ตรวจสอบว่าข้อมูลกรอกครบทุกช่องหรือยัง
   bool _isFormComplete() {
@@ -192,6 +193,8 @@ class _RegisteruserState extends State<Registeruser> {
                     if (isLocationChecked) {
                       var position = await _determinePosition();
                       log('${position.latitude} ${position.longitude}');
+                      lati = position.latitude;
+                      long = position.longitude;
                     }
                   }),
               ElevatedButton(
@@ -281,6 +284,14 @@ class _RegisteruserState extends State<Registeruser> {
       'profile_picture': imageUrl
     };
 
+    if(isLocationChecked){
+      var location_user = {
+            'location_loti': lati,
+            'location_long': long
+          };
+      db.collection('Users_location').doc(phoneCtl.text).set(location_user);
+    }
+    
     db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
       Navigator.pop(
         context,
