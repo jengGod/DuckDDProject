@@ -21,23 +21,34 @@ class _UserHomePageState extends State<UserHomePage> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // ตั้งค่าสีพื้นหลังเป็นสีเหลือง
+          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-            BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: 'list',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout),
+              label: 'Logout',
+            ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: Colors.black, // สีของไอเท็มที่ถูกเลือก
-          unselectedItemColor: Colors.black, // สีของไอเท็มที่ไม่ได้ถูกเลือก
+          selectedItemColor: const Color.fromARGB(255, 110, 112, 110), // Selected item color
+          unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
-            if (index == 3) { // ถ้าเป็น Logout
+            if (index == 3) {
               _showLogoutDialog(context);
             } else {
               setState(() {
                 selectedIndex = index;
-                // นำทางไปยังหน้าต่าง ๆ เมื่อไอคอนถูกกด
                 if (selectedIndex == 0) {
                   Navigator.pushReplacement(
                     context,
@@ -57,6 +68,7 @@ class _UserHomePageState extends State<UserHomePage> {
               });
             }
           },
+          type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
       body: Center(
