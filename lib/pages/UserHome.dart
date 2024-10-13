@@ -170,13 +170,20 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  void send(BuildContext context) { Navigator.push(
+  void send(BuildContext context) { 
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SendPage()),
-    );}
+    );
+    }
     
-  void receive(BuildContext context) {}
-
+  void receive(BuildContext context) {
+     Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Receciveuser()),
+    );
+  }
+    
    Future<void> loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
