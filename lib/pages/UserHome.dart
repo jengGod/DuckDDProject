@@ -133,8 +133,8 @@ class _UserHomePageState extends State<UserHomePage> {
               ],
             ),
               const SizedBox(height: 80),
-            Image.network(
-              'https://s3-alpha-sig.figma.com/img/653f/b6ea/a590e785cdd2f0c86c5b78ee99208920?Expires=1729468800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=KHDXbSOF88y5BXTlOy-MFgf0I9QEqtdhDNLWaqE85DAAIZS-lRETTinI0ReepRhdRE29DRJP-jTX8xFyeEPLAot-pYqhSljUhBhUWamtO2-cL88fKSTp3Mvq1jqWThF265CHQEKvOnU-pjlICBShcsomCHJFyqKyK70eFD6R6McjD9qy7ObD~~Aq3wR9sHKhOIsKYPE2YUmHIsPhmT8nnQqNUdRE88EAa7j-DiQZ4ktMQvpRfiLCecgixkhSr6jMyNEZIcJ5QzBlA53QjbOh8ML35OfPY8SynyoWKynV5NNSL8xlqWtrsbor0yArX0h1MNrII9k~z0YaiOI2cJk9pQ__',
+            Image.asset(
+              'assets/image/duck.png',
               width: 250,
               height: 250,
             ),

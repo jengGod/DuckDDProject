@@ -77,8 +77,8 @@ class _LoginPageState extends State<LoginPage> {
                                     color: Color.fromARGB(255, 255, 255, 255),
                                   ),
                                 ),
-                                Image.network(
-                                  'https://s3-alpha-sig.figma.com/img/064a/5671/00d6873be4cfaff05137012a09f47e5b?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=JIqhPBJ6MNG-KtpO~z6EEKjjfguHVd9Jvj27YRgj5gvCNfdWuk0ODKaDNnOb1FNlNfjtBq739R2C3AIcE3tiME8j87uURXX~qwUmh-nycc51CltZoWsT4ghb6HMM5Hk81-bI2nH34QE0t6zeFRXpRyYKbfiGxO-zFXHfvXOX-IHZTdNiog7oJM0QQ3UVL5gHs9Gr6tkQN00LmC0majlu1qLvRuPm-pon0oqpar3LhmmIbqyK39N~NYpoZ5N9XIG3CEd2ab1wdYvVHmK8Cv1JtE4uqd0~0VFt-eOWabTxdxfFrCMLPKWN~JuKym-4S6g~~nnGKWvw3Ttq3Axx2K4qZA__',
+                                Image.asset(
+                                  'assets/image/logoduck.png',
                                   width: 100,
                                   height: 65,
                                 ),
