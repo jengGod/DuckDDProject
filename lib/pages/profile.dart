@@ -424,8 +424,7 @@ String imageUrl = '';
 
 
 
-
-  Future<void> Savelocation(BuildContext context) async {
+Future<void> Savelocation(BuildContext context) async {
   if (newPasswordCtl.text != PassCtl.text) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Passwords do not match')),
@@ -442,26 +441,34 @@ String imageUrl = '';
   await prefs.setString('phonenumber', _phonenumberController.text);
   await prefs.setString('password', newPasswordCtl.text);
 
+  // เช็คว่ามีการเลือกภาพใหม่หรือไม่
+  String updatedImageUrl = imageUrl.isNotEmpty ? imageUrl : profilePicture ?? '';
+
+  // บันทึกรูปภาพใหม่หากมีการอัปโหลด
   if (imageUrl.isNotEmpty) {
-    await prefs.setString('profile_picture', imageUrl);
+    updatedImageUrl = imageUrl;
+    await prefs.setString('profile_picture', updatedImageUrl);
   }
 
   // เรียกใช้ฟังก์ชันเพื่ออัปเดตข้อมูลผู้ใช้ใน Firestore
-  await updateUserDataInFirestore(prefs.getString('email')!);
+  await updateUserDataInFirestore(prefs.getString('email')!, updatedImageUrl);
+
+  // รีเฟรชข้อมูลผู้ใช้หลังจากบันทึก
+  await loadUserData(); // โหลดข้อมูลผู้ใช้ใหม่
 
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(content: Text('Profile updated successfully')),
   );
 }
 
+
 // ฟังก์ชันสำหรับอัปเดตข้อมูลผู้ใช้ใน Firestore
-Future<void> updateUserDataInFirestore(String email) async {
-  
+Future<void> updateUserDataInFirestore(String email, String updatedImageUrl) async {
   String hashedPassword = sha256.convert(utf8.encode(newPasswordCtl.text)).toString();
   var db = FirebaseFirestore.instance;
 
   // ค้นหาผู้ใช้ตามอีเมลเพื่อดึง documentId
-  QuerySnapshot querySnapshot = await db.collection('users').where('email', isEqualTo: email).get();
+  QuerySnapshot querySnapshot = await db.collection('Users').where('email', isEqualTo: email).get();
   
   if (querySnapshot.docs.isNotEmpty) {
     String documentId = querySnapshot.docs.first.id; // ดึง documentId ของผู้ใช้
@@ -471,11 +478,11 @@ Future<void> updateUserDataInFirestore(String email) async {
       'email': _emailController.text,
       'phonenumber': _phonenumberController.text,
       'password': hashedPassword,
-      'profile_picture': imageUrl,
+      'profile_picture': updatedImageUrl, // ใช้ URL รูปภาพใหม่หากมี
     };
 
     // อัปเดตข้อมูลใน Firestore
-    await db.collection('users').doc(documentId).update(data);
+    await db.collection('Users').doc(documentId).update(data);
   } else {
     print('User not found in Firestore.');
   }
