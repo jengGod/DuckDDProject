@@ -5,6 +5,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:duckddproject/pages/DriverHomePage.dart';
 import 'package:duckddproject/pages/RegisterDriver.dart';
 import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:duckddproject/pages/UserHome.dart';
@@ -23,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController phoneCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
   bool isLoggingIn = false;
-
+  late final String password;
   @override
   Widget build(BuildContext contxte) {
     return Scaffold(
@@ -243,10 +244,13 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('email', userData['email']);
           await prefs.setString('phonenumber', userData['phonenumber']);
           await prefs.setString('profile_picture', userData['profile_picture']);
+          await prefs.setString('password', passCtl.text); 
           log('Login successful!');
+         
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => UserHomePage()),
+           
           );
         } else {
           log('Incorrect password.');
@@ -257,9 +261,10 @@ class _LoginPageState extends State<LoginPage> {
       }else if(driverDoc.exists){
         if (driverDoc['password'] == hashedPassword) {
           log('Login successful!');
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  UserHomePage()),
+            MaterialPageRoute(builder: (context) =>  DriverPage()),
           );
         } else {
           log('Incorrect password.');

@@ -29,7 +29,7 @@ class _RececiveuserState extends State<Receciveuser> {
         title: const Text('Home'),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 0.0),
         child: BottomNavigationBar(
           backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [

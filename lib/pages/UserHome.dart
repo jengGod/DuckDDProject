@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/Receivepackge.dart';
 import 'package:duckddproject/pages/packagelist.dart';
@@ -7,7 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserHomePage extends StatefulWidget {
-  const UserHomePage({super.key});
+   // Add password as a final property
+
+  const UserHomePage({super.key, }); // Mark it as required
+
   @override
   State<UserHomePage> createState() => _UserHomePageState();
 }
@@ -29,7 +34,7 @@ class _UserHomePageState extends State<UserHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 0.0),
         child: BottomNavigationBar(
           backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
@@ -39,7 +44,7 @@ class _UserHomePageState extends State<UserHomePage> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
-              label: 'list',
+              label: 'List',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),
@@ -60,9 +65,10 @@ class _UserHomePageState extends State<UserHomePage> {
               setState(() {
                 selectedIndex = index;
                 if (selectedIndex == 0) {
+                  //  log('password: ${widget.password}');
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const UserHomePage()),
+                    MaterialPageRoute(builder: (context) => UserHomePage()), 
                   );
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
@@ -70,9 +76,18 @@ class _UserHomePageState extends State<UserHomePage> {
                     MaterialPageRoute(builder: (context) => const Packagelist()),
                   );
                 } else if (selectedIndex == 2) {
+              
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const userProfile()),
+                    MaterialPageRoute(
+                      builder: (context) => userProfile(
+                        username: username,
+                        email: email,
+                        phonenumber: phonenumber,
+                        profilePicture: profilePicture,
+                        // Use the passed password
+                      ),
+                    ),
                   );
                 }
               });
@@ -81,64 +96,66 @@ class _UserHomePageState extends State<UserHomePage> {
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 120),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () => send(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 123, 122, 122),
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: 80), // Reduce the fixed height
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => send(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 123, 122, 122),
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      minimumSize: const Size(300, 60), // Minimum size of the button
                     ),
-                    minimumSize: const Size(300, 60), // ขนาดขั้นต่ำของปุ่ม
-                  ),
-                  child: const Text(
-                    'Send package',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () => receive(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 123, 122, 122),
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    minimumSize: const Size(300, 60), // ขนาดขั้นต่ำของปุ่ม
-                  ),
-                  child: const Text(
-                    'Receive package',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
+                    child: const Text(
+                      'Send package',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-              const SizedBox(height: 80),
-            Image.asset(
-              'assets/image/duck.png',
-              width: 250,
-              height: 250,
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => receive(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 123, 122, 122),
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      minimumSize: const Size(300, 60), // Minimum size of the button
+                    ),
+                    child: const Text(
+                      'Receive package',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 60), // Reduced height
+              Image.asset(
+                'assets/image/duck.png',
+                width: 250,
+                height: 250,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -150,11 +167,11 @@ class _UserHomePageState extends State<UserHomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Logout'),
-          content:  const Text('Do you want to logout?'),
+          content: const Text('Do you want to logout?'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // ปิด Dialog
+                Navigator.of(context).pop(); // Close dialog
               },
               child: const Text('Cancel'),
             ),
@@ -175,7 +192,7 @@ class _UserHomePageState extends State<UserHomePage> {
       context,
       MaterialPageRoute(builder: (context) => SendPage()),
     );
-    }
+  }
     
   void receive(BuildContext context) {
      Navigator.push(
@@ -184,7 +201,7 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
     
-   Future<void> loadUserData() async {
+  Future<void> loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       username = prefs.getString('username');
@@ -196,9 +213,7 @@ class _UserHomePageState extends State<UserHomePage> {
 
   Future<void> logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // ลบข้อมูลผู้ใช้ทั้งหมดใน SharedPreferences
-    await prefs.clear(); 
-    // เปลี่ยนหน้ากลับไปยังหน้าล็อกอิน
+    await prefs.clear(); // Clear user data
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),

@@ -23,7 +23,7 @@ TextEditingController walletCtl = TextEditingController();
 TextEditingController passwordCtl = TextEditingController();
 TextEditingController phoneCtl = TextEditingController();
 
-bool _isButtonPressed = false;
+bool _isButtonPressed = true;
 XFile? image;
 final ImagePicker picker = ImagePicker();
 String imageUrl = '';

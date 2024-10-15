@@ -1,10 +1,32 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class userProfile extends StatefulWidget {
-  const userProfile({super.key});
+  final String? email;
+  final String? username;
+  final String? phonenumber;
+  final String? profilePicture;
+  final String? password;
+
+  const userProfile({
+    super.key,
+    this.email,
+    this.username,
+    this.phonenumber,
+    this.profilePicture,
+    this.password,
+  });
 
   @override
   State<userProfile> createState() => _userProfileState();
@@ -12,13 +34,57 @@ class userProfile extends StatefulWidget {
 
 class _userProfileState extends State<userProfile> {
   int selectedIndex = 2;
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+  bool _isButtonPressed = false;
+  // Controllers for text fields
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phonenumberController = TextEditingController();
+  final TextEditingController _oldPasswordController = TextEditingController();
+   TextEditingController newPasswordCtl = TextEditingController();
+   TextEditingController PassCtl = TextEditingController();
+  final TextEditingController phoneCtl = TextEditingController();
+
+  // Visibility state for password fields
+  bool _isOldPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+
+ bool _isFormComplete() {
+    return 
+        newPasswordCtl.text.isNotEmpty &&
+        PassCtl.text.isNotEmpty ;
+       
+  }
+
+XFile? image;
+final ImagePicker picker = ImagePicker();
+String imageUrl = '';
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+    // _oldPasswordController.text =
+    //  
+    //   widget.password ?? ''; // Set the old password field
+    _usernameController.addListener(() => setState(() {}));
+    _emailController.addListener(() => setState(() {}));
+    phoneCtl.addListener(() => setState(() {}));
+    _oldPasswordController.addListener(() => setState(() {}));
+    newPasswordCtl.addListener(() => setState(() {}));
+    PassCtl.addListener(() => setState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 0.0),
         child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
+          backgroundColor:
+              const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -26,7 +92,7 @@ class _userProfileState extends State<userProfile> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
-              label: 'list',
+              label: 'List',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),
@@ -38,7 +104,8 @@ class _userProfileState extends State<userProfile> {
             ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: Color.fromARGB(255, 110, 112, 110), // Selected item color
+          selectedItemColor:
+              const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
             if (index == 3) {
@@ -49,17 +116,20 @@ class _userProfileState extends State<userProfile> {
                 if (selectedIndex == 0) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const UserHomePage()),
+                    MaterialPageRoute(
+                        builder: (context) => const UserHomePage()),
                   );
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const Packagelist()),
+                    MaterialPageRoute(
+                        builder: (context) => const Packagelist()),
                   );
                 } else if (selectedIndex == 2) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const userProfile()),
+                    MaterialPageRoute(
+                        builder: (context) => const userProfile()),
                   );
                 }
               });
@@ -73,98 +143,160 @@ class _userProfileState extends State<userProfile> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-          
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    backgroundImage: profilePicture != null
+                        ? NetworkImage(profilePicture!)
+                        : const AssetImage('asset/logoduck.png'),
                   ),
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.black),
-                    onPressed: () {},
+                   onPressed: () async {
+                    log('start:');
+                    final ImagePicker picker = ImagePicker();
+                    image = await picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      log('image:');
+                      log(image!.path);
+                      imageUrl = await uploadImage(image!);
+                      setState(() {});
+                    }}
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-          
+
               // Email field
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-          
+
               // Name field
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
                     labelText: 'Name',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-          
+
               // Phone number field
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: _phonenumberController,
+                  decoration: const InputDecoration(
                     labelText: 'Phone Number',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-          
-              // Old password field
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
-                  obscureText: true,
+                  controller: _oldPasswordController,
+                  obscureText: !_isOldPasswordVisible, // ปรับการซ่อนข้อความ
                   decoration: InputDecoration(
                     labelText: 'Old Pass',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isOldPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isOldPasswordVisible =
+                              !_isOldPasswordVisible; // เปลี่ยนสถานะการมองเห็น
+                        });
+                      },
+                    ),
                   ),
+                  onChanged: (value) {
+                    // ป้องกันการลบรหัสผ่านเก่า
+                    if (value.isEmpty || value != widget.password) {
+                      // คืนค่าช่องกรอกเป็นรหัสผ่านเก่า
+                      _oldPasswordController.text = widget.password ?? '';
+                      // ย้ายเคอร์เซอร์ไปที่ท้ายข้อความ
+                      _oldPasswordController.selection =
+                          TextSelection.fromPosition(TextPosition(
+                              offset: _oldPasswordController.text.length));
+                    }
+                  },
                 ),
               ),
               const SizedBox(height: 16),
-          
+
               // New password field
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
-                  obscureText: true,
+                  controller: newPasswordCtl,
+                  obscureText: !_isNewPasswordVisible,
+                  inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ห้ามพิมพ์ spacebar
+                ],
                   decoration: InputDecoration(
                     labelText: 'New Pass',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isNewPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isNewPasswordVisible = !_isNewPasswordVisible;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+
+              // Confirm New password field
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
+                  controller: PassCtl,
                   obscureText: true,
-                  decoration: InputDecoration(
+                  inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // ห้ามพิมพ์ spacebar
+                ],
+                  decoration: const InputDecoration(
                     labelText: 'Confirm New Pass',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-             Padding(
+
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
-                  width: double.infinity, // Make the button take up full width like the TextField
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Changelocation(context),
                     style: ElevatedButton.styleFrom(
@@ -188,9 +320,22 @@ class _userProfileState extends State<userProfile> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
-                  width: double.infinity, // Make the button take up full width like the TextField
+                  width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () => Savelocation(context),
+                    onPressed: !_isFormComplete() || _isButtonPressed
+                    ? null // ปุ่มถูกปิดหากยังกรอกข้อมูลไม่ครบหรือปุ่มถูกกดแล้ว
+                    : () async {
+                        setState(() {
+                          _isButtonPressed = true; // เปลี่ยนสถานะเป็นกดแล้ว
+                        });
+
+                        Savelocation(context); //
+
+                        setState(() {
+                          _isButtonPressed =
+                              false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
+                        });
+                      },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 15),
@@ -243,8 +388,108 @@ class _userProfileState extends State<userProfile> {
       },
     );
   }
+  Future<String> uploadImage(XFile image) async {
+    // สร้าง Reference สำหรับ Firebase Storage
+    final storageRef = FirebaseStorage.instance.ref();
 
-  Savelocation(BuildContext context) {}
+    // สร้าง path สำหรับเก็บรูปภาพ
+    final imageRef = storageRef.child('profile_pictures/${image.name}');
 
-  Changelocation(BuildContext context) {}
+    // อัปโหลดรูปภาพ
+    await imageRef.putFile(File(image.path));
+
+    // รับ URL ของรูปภาพที่ถูกอัปโหลด
+    String downloadURL = await imageRef.getDownloadURL();
+    return downloadURL;
+  }
+
+ Future<void> loadUserData() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  setState(() {
+    username = prefs.getString('username');
+    email = prefs.getString('email');
+    phonenumber = prefs.getString('phonenumber');
+    profilePicture = prefs.getString('profile_picture');
+    String? oldPassword = prefs.getString('password'); // Load old password
+
+    // Set the old password in the controller
+    _oldPasswordController.text = oldPassword ?? ''; // Update the old password field
+
+    // Update the text field controllers with loaded data
+    _emailController.text = email ?? '';
+    _usernameController.text = username ?? '';
+    _phonenumberController.text = phonenumber ?? '';
+  });
+}
+
+
+
+Future<void> Savelocation(BuildContext context) async {
+  if (newPasswordCtl.text != PassCtl.text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Passwords do not match')),
+    );
+    return;
+  }
+  
+  String hashedPassword = sha256.convert(utf8.encode(newPasswordCtl.text)).toString();
+
+  // บันทึกข้อมูลผู้ใช้ที่อัปเดตใน SharedPreferences
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('email', _emailController.text);
+  await prefs.setString('username', _usernameController.text);
+  await prefs.setString('phonenumber', _phonenumberController.text);
+  await prefs.setString('password', newPasswordCtl.text);
+
+  // เช็คว่ามีการเลือกภาพใหม่หรือไม่
+  String updatedImageUrl = imageUrl.isNotEmpty ? imageUrl : profilePicture ?? '';
+
+  // บันทึกรูปภาพใหม่หากมีการอัปโหลด
+  if (imageUrl.isNotEmpty) {
+    updatedImageUrl = imageUrl;
+    await prefs.setString('profile_picture', updatedImageUrl);
+  }
+
+  // เรียกใช้ฟังก์ชันเพื่ออัปเดตข้อมูลผู้ใช้ใน Firestore
+  await updateUserDataInFirestore(prefs.getString('email')!, updatedImageUrl);
+
+  // รีเฟรชข้อมูลผู้ใช้หลังจากบันทึก
+  await loadUserData(); // โหลดข้อมูลผู้ใช้ใหม่
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Profile updated successfully')),
+  );
+}
+
+
+// ฟังก์ชันสำหรับอัปเดตข้อมูลผู้ใช้ใน Firestore
+Future<void> updateUserDataInFirestore(String email, String updatedImageUrl) async {
+  String hashedPassword = sha256.convert(utf8.encode(newPasswordCtl.text)).toString();
+  var db = FirebaseFirestore.instance;
+
+  // ค้นหาผู้ใช้ตามอีเมลเพื่อดึง documentId
+  QuerySnapshot querySnapshot = await db.collection('Users').where('email', isEqualTo: email).get();
+  
+  if (querySnapshot.docs.isNotEmpty) {
+    String documentId = querySnapshot.docs.first.id; // ดึง documentId ของผู้ใช้
+
+    var data = {
+      'username': _usernameController.text,
+      'email': _emailController.text,
+      'phonenumber': _phonenumberController.text,
+      'password': hashedPassword,
+      'profile_picture': updatedImageUrl, // ใช้ URL รูปภาพใหม่หากมี
+    };
+
+    // อัปเดตข้อมูลใน Firestore
+    await db.collection('Users').doc(documentId).update(data);
+  } else {
+    print('User not found in Firestore.');
+  }
+}
+
+
+  Changelocation(BuildContext context) {
+   
+  }
 }
