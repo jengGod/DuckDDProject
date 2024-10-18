@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:duckddproject/pages/ChangePassword.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
@@ -38,36 +39,36 @@ class _userProfileState extends State<userProfile> {
   String? email;
   String? phonenumber;
   String? profilePicture;
+  String? oldPassword;
   bool _isButtonPressed = false;
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phonenumberController = TextEditingController();
   final TextEditingController _oldPasswordController = TextEditingController();
-   TextEditingController newPasswordCtl = TextEditingController();
-   TextEditingController PassCtl = TextEditingController();
+  TextEditingController newPasswordCtl = TextEditingController();
+  TextEditingController PassCtl = TextEditingController();
   final TextEditingController phoneCtl = TextEditingController();
 
   // Visibility state for password fields
   bool _isOldPasswordVisible = false;
   bool _isNewPasswordVisible = false;
 
- bool _isFormComplete() {
-    return 
-        newPasswordCtl.text.isNotEmpty &&
-        PassCtl.text.isNotEmpty ;
-       
+  bool _isFormComplete() {
+    return _emailController.text.isNotEmpty &&
+        _usernameController.text.isNotEmpty &&
+        _phonenumberController.text.isNotEmpty;
   }
 
-XFile? image;
-final ImagePicker picker = ImagePicker();
-String imageUrl = '';
+  XFile? image;
+  final ImagePicker picker = ImagePicker();
+  String imageUrl = '';
   @override
   void initState() {
     super.initState();
     loadUserData();
     // _oldPasswordController.text =
-    //  
+    //
     //   widget.password ?? ''; // Set the old password field
     _usernameController.addListener(() => setState(() {}));
     _emailController.addListener(() => setState(() {}));
@@ -153,18 +154,19 @@ String imageUrl = '';
                         : const AssetImage('asset/logoduck.png'),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.black),
-                   onPressed: () async {
-                    log('start:');
-                    final ImagePicker picker = ImagePicker();
-                    image = await picker.pickImage(source: ImageSource.gallery);
-                    if (image != null) {
-                      log('image:');
-                      log(image!.path);
-                      imageUrl = await uploadImage(image!);
-                      setState(() {});
-                    }}
-                  ),
+                      icon: const Icon(Icons.edit, color: Colors.black),
+                      onPressed: () async {
+                        log('start:');
+                        final ImagePicker picker = ImagePicker();
+                        image =
+                            await picker.pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          log('image:');
+                          log(image!.path);
+                          imageUrl = await uploadImage(image!);
+                          setState(() {});
+                        }
+                      }),
                 ],
               ),
               const SizedBox(height: 20),
@@ -208,86 +210,27 @@ String imageUrl = '';
               ),
               const SizedBox(height: 16),
 
+              const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: _oldPasswordController,
-                  obscureText: !_isOldPasswordVisible, // ปรับการซ่อนข้อความ
-                  decoration: InputDecoration(
-                    labelText: 'Old Pass',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isOldPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Changepass(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 155, 155, 153),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isOldPasswordVisible =
-                              !_isOldPasswordVisible; // เปลี่ยนสถานะการมองเห็น
-                        });
-                      },
                     ),
-                  ),
-                  onChanged: (value) {
-                    // ป้องกันการลบรหัสผ่านเก่า
-                    if (value.isEmpty || value != widget.password) {
-                      // คืนค่าช่องกรอกเป็นรหัสผ่านเก่า
-                      _oldPasswordController.text = widget.password ?? '';
-                      // ย้ายเคอร์เซอร์ไปที่ท้ายข้อความ
-                      _oldPasswordController.selection =
-                          TextSelection.fromPosition(TextPosition(
-                              offset: _oldPasswordController.text.length));
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // New password field
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: newPasswordCtl,
-                  obscureText: !_isNewPasswordVisible,
-                  inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')), // ห้ามพิมพ์ spacebar
-                ],
-                  decoration: InputDecoration(
-                    labelText: 'New Pass',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isNewPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                    child: const Text(
+                      'Change Password',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isNewPasswordVisible = !_isNewPasswordVisible;
-                        });
-                      },
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Confirm New password field
-               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: PassCtl,
-                  obscureText: true,
-                  inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')), // ห้ามพิมพ์ spacebar
-                ],
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm New Pass',
-                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -322,22 +265,11 @@ String imageUrl = '';
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: !_isFormComplete() || _isButtonPressed
-                    ? null // ปุ่มถูกปิดหากยังกรอกข้อมูลไม่ครบหรือปุ่มถูกกดแล้ว
-                    : () async {
-                        setState(() {
-                          _isButtonPressed = true; // เปลี่ยนสถานะเป็นกดแล้ว
-                        });
+                    onPressed: () => Savelocation(context) //
 
-                        Savelocation(context); //
-
-                        setState(() {
-                          _isButtonPressed =
-                              false; // เปลี่ยนสถานะกลับเมื่อเสร็จสิ้น
-                        });
-                      },
+                    ,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: Color.fromARGB(255, 77, 209, 0),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -388,6 +320,7 @@ String imageUrl = '';
       },
     );
   }
+
   Future<String> uploadImage(XFile image) async {
     // สร้าง Reference สำหรับ Firebase Storage
     final storageRef = FirebaseStorage.instance.ref();
@@ -403,93 +336,108 @@ String imageUrl = '';
     return downloadURL;
   }
 
- Future<void> loadUserData() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  setState(() {
-    username = prefs.getString('username');
-    email = prefs.getString('email');
-    phonenumber = prefs.getString('phonenumber');
-    profilePicture = prefs.getString('profile_picture');
-    String? oldPassword = prefs.getString('password'); // Load old password
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+      oldPassword = prefs.getString('password'); // Load old password
 
-    // Set the old password in the controller
-    _oldPasswordController.text = oldPassword ?? ''; // Update the old password field
+      // Set the old password in the controller
+      oldPassword = oldPassword ?? '';
 
-    // Update the text field controllers with loaded data
-    _emailController.text = email ?? '';
-    _usernameController.text = username ?? '';
-    _phonenumberController.text = phonenumber ?? '';
-  });
-}
-
-
-
-Future<void> Savelocation(BuildContext context) async {
-  if (newPasswordCtl.text != PassCtl.text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Passwords do not match')),
-    );
-    return;
-  }
-  
-  String hashedPassword = sha256.convert(utf8.encode(newPasswordCtl.text)).toString();
-
-  // บันทึกข้อมูลผู้ใช้ที่อัปเดตใน SharedPreferences
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('email', _emailController.text);
-  await prefs.setString('username', _usernameController.text);
-  await prefs.setString('phonenumber', _phonenumberController.text);
-  await prefs.setString('password', newPasswordCtl.text);
-
-  // เช็คว่ามีการเลือกภาพใหม่หรือไม่
-  String updatedImageUrl = imageUrl.isNotEmpty ? imageUrl : profilePicture ?? '';
-
-  // บันทึกรูปภาพใหม่หากมีการอัปโหลด
-  if (imageUrl.isNotEmpty) {
-    updatedImageUrl = imageUrl;
-    await prefs.setString('profile_picture', updatedImageUrl);
+      // Update the text field controllers with loaded data
+      _emailController.text = email ?? '';
+      _usernameController.text = username ?? '';
+      _phonenumberController.text = phonenumber ?? '';
+      phonenumber = phonenumber ?? '';
+    });
   }
 
-  // เรียกใช้ฟังก์ชันเพื่ออัปเดตข้อมูลผู้ใช้ใน Firestore
-  await updateUserDataInFirestore(prefs.getString('email')!, updatedImageUrl);
+  Future<void> Savelocation(BuildContext context) async {
+    if (newPasswordCtl.text != PassCtl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
 
-  // รีเฟรชข้อมูลผู้ใช้หลังจากบันทึก
-  await loadUserData(); // โหลดข้อมูลผู้ใช้ใหม่
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String oldPhonenumber = prefs.getString('phonenumber') ?? '';
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Profile updated successfully')),
-  );
-}
+    // อัปเดตข้อมูลใน SharedPreferences
+    await prefs.setString('email', _emailController.text);
+    await prefs.setString('username', _usernameController.text);
+    await prefs.setString('phonenumber', _phonenumberController.text);
 
+    // ตรวจสอบว่ามีการอัปโหลดรูปภาพใหม่หรือไม่
+    if (image != null) {
+      String newImageUrl = await uploadImage(image!);
+      log('Image uploaded URL: $newImageUrl');
 
-// ฟังก์ชันสำหรับอัปเดตข้อมูลผู้ใช้ใน Firestore
-Future<void> updateUserDataInFirestore(String email, String updatedImageUrl) async {
-  String hashedPassword = sha256.convert(utf8.encode(newPasswordCtl.text)).toString();
-  var db = FirebaseFirestore.instance;
-
-  // ค้นหาผู้ใช้ตามอีเมลเพื่อดึง documentId
-  QuerySnapshot querySnapshot = await db.collection('Users').where('email', isEqualTo: email).get();
-  
-  if (querySnapshot.docs.isNotEmpty) {
-    String documentId = querySnapshot.docs.first.id; // ดึง documentId ของผู้ใช้
-
-    var data = {
-      'username': _usernameController.text,
-      'email': _emailController.text,
-      'phonenumber': _phonenumberController.text,
-      'password': hashedPassword,
-      'profile_picture': updatedImageUrl, // ใช้ URL รูปภาพใหม่หากมี
-    };
+      await prefs.setString('profile_picture', newImageUrl);
+      setState(() {
+        profilePicture = newImageUrl;
+      });
+    }
 
     // อัปเดตข้อมูลใน Firestore
-    await db.collection('Users').doc(documentId).update(data);
-  } else {
-    print('User not found in Firestore.');
+    await updateUserDataInFirestore(
+        profilePicture != null ? profilePicture! : '');
+
+    // โหลดข้อมูลผู้ใช้ใหม่
+    await loadUserData();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile updated successfully')),
+    );
   }
-}
 
+  Future<void> updateUserDataInFirestore(String updatedImageUrl) async {
+    var db = FirebaseFirestore.instance;
 
-  Changelocation(BuildContext context) {
-   
+    // ค้นหาผู้ใช้ตามเบอร์โทรเก่าเพื่อดึง documentId
+    QuerySnapshot querySnapshot = await db
+        .collection('Users')
+        .where('phonenumber', isEqualTo: phonenumber)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // ถ้ามีผู้ใช้ให้ทำการอัปเดต
+      String hashedPassword =
+          sha256.convert(utf8.encode(oldPassword!)).toString();
+      String documentId = querySnapshot.docs.first.id;
+
+      var data = {
+        'username': _usernameController.text,
+        'email': _emailController.text,
+        'phonenumber': _phonenumberController.text, // อัปเดตเบอร์โทรใหม่
+        'profile_picture': updatedImageUrl,
+        'password': hashedPassword
+      };
+
+      // อัปเดตข้อมูลใน document เดิม
+      await db.collection('Users').doc(documentId).update(data);
+
+      // เปลี่ยนชื่อ document ตามเบอร์โทรใหม่
+      await db.collection('Users').doc(documentId).delete(); // ลบเอกสารเก่า
+      await db
+          .collection('Users')
+          .doc(_phonenumberController.text)
+          .set(data); // สร้างเอกสารใหม่
+    } else {
+      print('User not found in Firestore.');
+    }
+  }
+
+  Changelocation(BuildContext context) {}
+
+  Changepass(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Changepassword()),
+    );
   }
 }
