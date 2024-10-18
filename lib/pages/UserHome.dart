@@ -99,7 +99,7 @@ class _UserHomePageState extends State<UserHomePage> {
                     minimumSize: const Size(300, 60), // ขนาดขั้นต่ำของปุ่ม
                   ),
                   child: const Text(
-                    'Send package',
+                    'Package',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 25,

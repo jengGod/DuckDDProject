@@ -67,6 +67,34 @@ class _RegisterdriverState extends State<Registerdriver> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              FilledButton(
+                  onPressed: () async {
+                    log('start:');
+                    final ImagePicker picker = ImagePicker();
+                    image = await picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      log('image:');
+                      log(image!.path);
+                      imageUrl = await uploadImage(image!);
+                      setState(() {});
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Profile picture',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  )),
+              const SizedBox(height: 20),
               TextField(
                 controller: usernameCtl,
                 inputFormatters: [
@@ -173,35 +201,6 @@ class _RegisterdriverState extends State<Registerdriver> {
                 ),
               ),
               const SizedBox(height: 20),
-              // ส่วนเลือกอัปโหลดรูปภาพ
-              FilledButton(
-                  onPressed: () async {
-                    log('start:');
-                    final ImagePicker picker = ImagePicker();
-                    image = await picker.pickImage(source: ImageSource.gallery);
-                    if (image != null) {
-                      log('image:');
-                      log(image!.path);
-                      imageUrl = await uploadImage(image!);
-                      setState(() {});
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text(
-                    'Profile picture',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-              const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: !_isFormComplete() || _isButtonPressed
                     ? null
