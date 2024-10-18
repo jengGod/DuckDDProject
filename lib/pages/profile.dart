@@ -38,6 +38,7 @@ class _userProfileState extends State<userProfile> {
   String? email;
   String? phonenumber;
   String? profilePicture;
+  String? oldPassword;
   bool _isButtonPressed = false;
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
@@ -317,10 +318,10 @@ String imageUrl = '';
     email = prefs.getString('email');
     phonenumber = prefs.getString('phonenumber');
     profilePicture = prefs.getString('profile_picture');
-    String? oldPassword = prefs.getString('password'); // Load old password
+    oldPassword = prefs.getString('password'); // Load old password
 
     // Set the old password in the controller
-    _oldPasswordController.text = oldPassword ?? ''; // Update the old password field
+    oldPassword = oldPassword ?? ''; 
 
     // Update the text field controllers with loaded data
     _emailController.text = email ?? '';
@@ -329,7 +330,6 @@ String imageUrl = '';
      phonenumber =phonenumber ?? '';
   });
 }
-
 Future<void> Savelocation(BuildContext context) async {
   if (newPasswordCtl.text != PassCtl.text) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -341,6 +341,7 @@ Future<void> Savelocation(BuildContext context) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String oldPhonenumber = prefs.getString('phonenumber') ?? '';
 
+  // อัปเดตข้อมูลใน SharedPreferences
   await prefs.setString('email', _emailController.text);
   await prefs.setString('username', _usernameController.text);
   await prefs.setString('phonenumber', _phonenumberController.text);
@@ -354,9 +355,12 @@ Future<void> Savelocation(BuildContext context) async {
     setState(() {
       profilePicture = newImageUrl;
     });
-
   }
 
+  // อัปเดตข้อมูลใน Firestore
+  await updateUserDataInFirestore(profilePicture != null ? profilePicture! : '');
+
+  // โหลดข้อมูลผู้ใช้ใหม่
   await loadUserData();
 
   ScaffoldMessenger.of(context).showSnackBar(
@@ -364,9 +368,7 @@ Future<void> Savelocation(BuildContext context) async {
   );
 }
 
-Future<void> updateUserDataInFirestore(
-  String updatedImageUrl) async {
-  String hashedPassword = sha256.convert(utf8.encode(newPasswordCtl.text)).toString();
+Future<void> updateUserDataInFirestore(String updatedImageUrl) async {
   var db = FirebaseFirestore.instance;
 
   // ค้นหาผู้ใช้ตามเบอร์โทรเก่าเพื่อดึง documentId
@@ -376,18 +378,25 @@ Future<void> updateUserDataInFirestore(
       .get();
 
   if (querySnapshot.docs.isNotEmpty) {
+    // ถ้ามีผู้ใช้ให้ทำการอัปเดต
+     String hashedPassword =
+        sha256.convert(utf8.encode(oldPassword!)).toString();
     String documentId = querySnapshot.docs.first.id;
-    
+
     var data = {
       'username': _usernameController.text,
       'email': _emailController.text,
       'phonenumber': _phonenumberController.text, // อัปเดตเบอร์โทรใหม่
       'profile_picture': updatedImageUrl,
-      // 'password': hashedPassword,
+      'password':hashedPassword
     };
 
-    // สร้าง document ใหม่ด้วยเบอร์โทรใหม่
-    await db.collection('Users').doc(_phonenumberController.text).set(data);
+    // อัปเดตข้อมูลใน document เดิม
+    await db.collection('Users').doc(documentId).update(data);
+
+    // เปลี่ยนชื่อ document ตามเบอร์โทรใหม่
+    await db.collection('Users').doc(documentId).delete(); // ลบเอกสารเก่า
+    await db.collection('Users').doc(_phonenumberController.text).set(data); // สร้างเอกสารใหม่
   } else {
     print('User not found in Firestore.');
   }
