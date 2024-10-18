@@ -267,9 +267,8 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('phonenumber', driverData['phonenumber']);
           await prefs.setString('profile_picture', driverData['profile_picture']);
           log('Login successful!');
+          
           Navigator.pushReplacement(
-
-          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => DriverPage()),//--------------------**
           );
