@@ -1,7 +1,9 @@
-import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/UserHome.dart';
-import 'package:duckddproject/pages/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Packagelist extends StatefulWidget {
   const Packagelist({super.key});
@@ -11,191 +13,124 @@ class Packagelist extends StatefulWidget {
 }
 
 class _PackagelistState extends State<Packagelist> {
-  int selectedIndex = 1;
-  final List<Map<String, String?>> packages = [
-    {"name": "STATUS", "status": "search for driver"},
-    {"name": "STATUS", "status": "pickup package"},
-    {"name": "STATUS", "status": "delivering"},
-    {"name": "STATUS", "status": "delivered"},
-  ];
+  LatLng? latLng;
+  MapController mapController = MapController();
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _determinePosition(); // เรียกฟังก์ชันหาตำแหน่งปัจจุบัน
+  }
+
+  // ฟังก์ชันเพื่อหาตำแหน่งปัจจุบัน
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // ตรวจสอบว่าบริการ GPS เปิดอยู่หรือไม่
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // หากไม่เปิดบริการ ให้แจ้งเตือนหรือส่งกลับค่าเริ่มต้น
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // ดึงตำแหน่งปัจจุบัน
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      latLng = LatLng(position.latitude, position.longitude);
+      isLoading = false;
+    });
+    mapController.move(latLng!, 15.0); // ขยับแผนที่ไปยังตำแหน่งปัจจุบัน
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0.0),
-        child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'list',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.logout),
-              label: 'Logout',
-            ),
-          ],
-          currentIndex: selectedIndex,
-          selectedItemColor: const Color.fromARGB(255, 110, 112, 110),
-          unselectedItemColor: Colors.black,
-          onTap: (int index) {
-            if (index == 3) {
-              _showLogoutDialog(context);
-            } else {
-              setState(() {
-                selectedIndex = index;
-                if (selectedIndex == 0) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UserHomePage()),
-                  );
-                } else if (selectedIndex == 1) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Packagelist()),
-                  );
-                } else if (selectedIndex == 2) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const userProfile()),
-                  );
-                }
-              });
-            }
-          },
-          type: BottomNavigationBarType.fixed,
-        ),
+      appBar: AppBar(
+        title: const Text('เลือกตำแหน่งบนแผนที่'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: packages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Card(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
+      body: isLoading
+          ? const Center(
+              child:
+                  CircularProgressIndicator()) // แสดงวงกลมโหลดหากยังหาตำแหน่งไม่เจอ
+          : Column(
+              children: [
+                Expanded(
+                  child: FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: latLng!,
+                      initialZoom: 15.0,
+                      onTap: (tapPosition, point) {
+                        setState(() {
+                          latLng = point; // อัปเดตตำแหน่งเมื่อคลิกแผนที่
+                        });
+                      },
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
+                        maxNativeZoom: 19,
                       ),
-                      elevation: 4,
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              color: const Color.fromARGB(255, 252, 227, 3),
-                              width: 120,
-                              height: 120,
-                              child: const Icon(Icons.image, size: 50),
-                            ),
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Card(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      packages[index]['name'] ?? 'No Name', // ใช้ ?? เพื่อจัดการกับค่า null
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      packages[index]['status'] ?? 'No Status', // ใช้ ?? เพื่อจัดการกับค่า null
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              More(context);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.black,
-                                            ),
-                                            child: const Text(
-                                              'more',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                      if (latLng != null)
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: latLng!,
+                              width: 40,
+                              height: 40,
+                              child: const Icon(
+                                Icons.location_on,
+                                color: Colors.red,
+                                size: 40,
                               ),
                             ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (latLng != null) {
+                        // ส่งค่าพิกัดกลับไปและ pop ออกจากหน้า
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  UserHomePage()),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('กรุณาเลือกตำแหน่งก่อน'),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+                        );
+                      }
+                    },
+                    child: const Text('ตกลง'),
+                  ),
+                ),
+              ],
+            ),
     );
   }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Do you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-              child: const Text('Logout'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void More(BuildContext context) {}
 }
