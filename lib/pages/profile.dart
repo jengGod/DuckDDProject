@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/ChangePassword.dart';
+import 'package:duckddproject/pages/Changelocation.dart';
+import 'package:duckddproject/pages/Changelocation.dart';
+import 'package:duckddproject/pages/Changelocation.dart';
+import 'package:duckddproject/pages/Changelocation.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
@@ -241,7 +245,7 @@ class _userProfileState extends State<userProfile> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () => Changelocation(context),
+                    onPressed: () => changelocation(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 15),
@@ -432,8 +436,14 @@ class _userProfileState extends State<userProfile> {
     }
   }
 
-  Changelocation(BuildContext context) {}
-
+  changelocation(BuildContext context) {
+     Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Changelocation()),
+    );
+  }
+  
+    
   Changepass(BuildContext context) {
     Navigator.pushReplacement(
       context,
