@@ -25,6 +25,8 @@ class _SendPageState extends State<SendPage> {
   String? selectedPhoneNumber;
 
   LatLng? latLng;
+  LatLng? latLngSend;
+
   MapController mapController = MapController();
 
   String? username;
@@ -34,17 +36,19 @@ class _SendPageState extends State<SendPage> {
 
   double lati = 0;
   double long = 0;
+  double latiSend = 0;
+  double longSend = 0;
 
   Future<void> openReciverList() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const Reciverlistpage()),
     );
-    loadLocation();
     if (result != null) {
       setState(() {
         selectedUsername = result['username'];
         selectedPhoneNumber = result['phonenumber'];
+        loadLocation();
       });
     }
   }
@@ -342,26 +346,36 @@ class _SendPageState extends State<SendPage> {
   Future<void> loadLocation() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     try {
-      log(phonenumber.toString());
+      log(selectedPhoneNumber.toString());
       DocumentSnapshot locationDoc =
+          await firestore.collection('Users_location').doc(selectedPhoneNumber).get();
+      DocumentSnapshot locationSenderDoc =
           await firestore.collection('Users_location').doc(phonenumber).get();
-      if (locationDoc.exists) {
+      if (locationDoc.exists && locationSenderDoc.exists) {
         setState(() {
           lati = locationDoc['location_loti'];
           long = locationDoc['location_long'];
+          latiSend = locationSenderDoc['location_loti'];
+          longSend = locationSenderDoc['location_long'];
         });
       }
     } catch (e) {
       log('Error: $e');
     }
+    log('Location:');
+    log(lati.toString());
+    log(long.toString());
+    log(latiSend.toString());
+    log(longSend.toString());
   }
 
   Widget showMap() {
     try {
       setState(() {
         latLng = LatLng(lati, long);
+        latLngSend = LatLng(latiSend, longSend);
       });
-      mapController.move(latLng!, 15.0);
+      mapController.move(latLng!, 14.0);
     } catch (e) {}
 
     return SizedBox(
@@ -384,6 +398,21 @@ class _SendPageState extends State<SendPage> {
               markers: [
                 Marker(
                   point: latLng!,
+                  width: 40,
+                  height: 40,
+                  child: const Icon(
+                    Icons.flag,
+                    color: Colors.green,
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
+          if(latLngSend != null)
+          MarkerLayer(
+              markers: [
+                Marker(
+                  point: latLngSend!,
                   width: 40,
                   height: 40,
                   child: const Icon(
