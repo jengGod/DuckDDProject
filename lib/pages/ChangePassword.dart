@@ -163,30 +163,54 @@ class _ChangepasswordState extends State<Changepassword> {
   }
 
   Future<void> changePassword() async {
-    var db = FirebaseFirestore.instance;
     String oldPassword = _oldPasswordController.text;
     String newPassword = newPasswordCtl.text;
     String confirmPassword = passCtl.text;
 
-    // ตรวจสอบว่ารหัสผ่านใหม่และการยืนยันตรงกัน
-    if (newPassword != confirmPassword) {
-      _showMessage('New password and confirm password do not match');
-      return;
+    // ตรวจสอบว่ามีช่องไหนที่ยังไม่ได้กรอกหรือไม่
+    if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      _showMessage(
+          'กรุณากรอกข้อมูลให้ครบทุกช่อง'); // ถ้ามีช่องใดว่าง จะแสดงข้อความเตือน
+      return; // หยุดการทำงานของฟังก์ชันทันที
     }
 
-    // ถ้ารหัสผ่านเก่าถูกต้อง ให้ทำการแฮชและอัปเดตรหัสผ่านใหม่
-    String hashedPassword = sha256.convert(utf8.encode(newPassword)).toString();
-    var data = {'password': hashedPassword};
-    await db.collection('Users').doc(phonenumber).update(data);
+    // ตรวจสอบว่ารหัสผ่านใหม่และรหัสผ่านยืนยันตรงกันหรือไม่
+    if (newPassword != confirmPassword) {
+      _showMessage(
+          'รหัสผ่านใหม่และการยืนยันไม่ตรงกัน'); // ถ้ารหัสผ่านไม่ตรงกัน แสดงข้อความเตือน
+      return; // หยุดการทำงานของฟังก์ชันทันที
+    }
 
-    // บันทึกรหัสผ่านใหม่ใน SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('password', newPassword);
-    _showMessage('Password changed successfully');
+    // ถ้าทุกอย่างถูกต้อง ให้ทำการอัปเดตรหัสผ่านใน Firestore และ SharedPreferences
+    var db = FirebaseFirestore.instance;
+    String hashedPassword = sha256
+        .convert(utf8.encode(newPassword))
+        .toString(); // แฮชรหัสผ่านใหม่ด้วย SHA-256
+    var data = {
+      'password': hashedPassword
+    }; // เตรียมข้อมูลรหัสผ่านใหม่สำหรับอัปเดต
 
-    // กลับไปยังหน้าก่อนหน้า
-    Navigator.pop(context);
+    try {
+      await db.collection('Users').doc(phonenumber).update(
+          data); // อัปเดตรหัสผ่านใน Firestore โดยใช้หมายเลขโทรศัพท์เป็น Document ID
+
+      // บันทึกรหัสผ่านใหม่ลงใน SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('password', newPassword);
+
+      _showMessage(
+          'เปลี่ยนรหัสผ่านสำเร็จ'); // แสดงข้อความว่าการเปลี่ยนรหัสผ่านสำเร็จ
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const userProfile()),
+      );
+    
+  } catch (e) {
+    _showMessage('เกิดข้อผิดพลาดในการอัปเดตรหัสผ่าน กรุณาลองอีกครั้ง'); // ถ้ามีข้อผิดพลาดในการอัปเดต จะแสดงข้อความแจ้งผู้ใช้
   }
+  
+}
+
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
