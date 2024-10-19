@@ -1,9 +1,15 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:duckddproject/pages/reciverListPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SendPage extends StatefulWidget {
   const SendPage({super.key});
@@ -18,18 +24,49 @@ class _SendPageState extends State<SendPage> {
   String? selectedUsername;
   String? selectedPhoneNumber;
 
+  LatLng? latLng;
+  LatLng? latLngSend;
+
+  MapController mapController = MapController();
+
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+
+  double lati = 0;
+  double long = 0;
+  double latiSend = 0;
+  double longSend = 0;
+
   Future<void> openReciverList() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const Reciverlistpage()),
     );
-
     if (result != null) {
       setState(() {
         selectedUsername = result['username'];
         selectedPhoneNumber = result['phonenumber'];
+        loadLocation();
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+    });
   }
 
   @override
@@ -95,106 +132,111 @@ class _SendPageState extends State<SendPage> {
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(
-              height: 150,
-              width: double.infinity,
-              color: Colors.grey[300],
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 60,
-                      color: Colors.black45,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Container(
+                height: 150,
+                width: double.infinity,
+                color: Colors.grey[300],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 60,
+                        color: Colors.black45,
+                      ),
+                      onPressed: () {
+                        print('Cloud upload clicked');
+                      },
                     ),
-                    onPressed: () {
-                      print('Cloud upload clicked');
-                    },
+                    const SizedBox(width: 20),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.camera_alt_outlined,
+                        size: 60,
+                        color: Colors.black45,
+                      ),
+                      onPressed: () {
+                        print('Camera icon clicked');
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const TextField(
+                decoration: InputDecoration(
+                  labelText: 'Package Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const TextField(
+                decoration: InputDecoration(
+                  labelText: 'Package Description',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: openReciverList,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                  const SizedBox(width: 20),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.camera_alt_outlined,
-                      size: 60,
-                      color: Colors.black45,
+                  minimumSize:
+                      const Size(double.infinity, 50), // ปรับความกว้างให้เต็ม
+                ),
+                child: const Text(
+                  'Choose Receiver',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (selectedUsername != null && selectedPhoneNumber != null) ...[
+                //--------------------------*map here
+                Text('Receiver name: $selectedUsername'),
+                Text('Receiver phonenumber: $selectedPhoneNumber'),
+                const SizedBox(height: 16),
+                showMap(),
+              ],
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _showConfirmDialog(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
                     ),
-                    onPressed: () {
-                      print('Camera icon clicked');
-                    },
+                    child: const Text(
+                      'Send package',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Package Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Package Description',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: openReciverList,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                minimumSize:
-                    const Size(double.infinity, 50), // ปรับความกว้างให้เต็ม
-              ),
-              child: const Text(
-                'Choose Receiver',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (selectedUsername != null && selectedPhoneNumber != null) ...[
-              Text('Receiver name: $selectedUsername'),
-              Text('Receiver phonenumber: $selectedPhoneNumber'),
             ],
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _showConfirmDialog(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text(
-                    'Send package',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -298,6 +340,91 @@ class _SendPageState extends State<SendPage> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> loadLocation() async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      log(selectedPhoneNumber.toString());
+      DocumentSnapshot locationDoc =
+          await firestore.collection('Users_location').doc(selectedPhoneNumber).get();
+      DocumentSnapshot locationSenderDoc =
+          await firestore.collection('Users_location').doc(phonenumber).get();
+      if (locationDoc.exists && locationSenderDoc.exists) {
+        setState(() {
+          lati = locationDoc['location_loti'];
+          long = locationDoc['location_long'];
+          latiSend = locationSenderDoc['location_loti'];
+          longSend = locationSenderDoc['location_long'];
+        });
+      }
+    } catch (e) {
+      log('Error: $e');
+    }
+    log('Location:');
+    log(lati.toString());
+    log(long.toString());
+    log(latiSend.toString());
+    log(longSend.toString());
+  }
+
+  Widget showMap() {
+    try {
+      setState(() {
+        latLng = LatLng(lati, long);
+        latLngSend = LatLng(latiSend, longSend);
+      });
+      mapController.move(latLng!, 14.0);
+    } catch (e) {}
+
+    return SizedBox(
+      width: 400, // Set the desired width
+      height: 200, // Set the desired height
+      child: FlutterMap(
+        mapController: mapController,
+        options: MapOptions(
+          initialCenter: latLng!,
+          initialZoom: 15.0,
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.example.app',
+            maxNativeZoom: 19,
+          ),
+          if (latLng != null)
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: latLng!,
+                  width: 40,
+                  height: 40,
+                  child: const Icon(
+                    Icons.flag,
+                    color: Colors.green,
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
+          if(latLngSend != null)
+          MarkerLayer(
+              markers: [
+                Marker(
+                  point: latLngSend!,
+                  width: 40,
+                  height: 40,
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }
