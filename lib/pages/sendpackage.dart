@@ -19,6 +19,9 @@ class SendPage extends StatefulWidget {
 }
 
 class _SendPageState extends State<SendPage> {
+  TextEditingController packageNameCtl = TextEditingController();
+  TextEditingController packageDescriptionCtl = TextEditingController();
+
   int selectedIndex = 0;
 
   String? selectedUsername;
@@ -169,15 +172,17 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                controller: packageNameCtl,
+                decoration: const InputDecoration(
                   labelText: 'Package Name',
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                controller: packageDescriptionCtl,
+                decoration: const InputDecoration(
                   labelText: 'Package Description',
                   border: OutlineInputBorder(),
                 ),
@@ -204,8 +209,7 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (selectedUsername != null && selectedPhoneNumber != null) ...[
-                //--------------------------*map here
+              if (selectedUsername != null && selectedPhoneNumber != null) ...[ //--------------------------*map here
                 Text('Receiver name: $selectedUsername'),
                 Text('Receiver phonenumber: $selectedPhoneNumber'),
                 const SizedBox(height: 16),
@@ -305,6 +309,7 @@ class _SendPageState extends State<SendPage> {
   }
 
   void Confirm(BuildContext context) {
+    addOrder();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -427,4 +432,54 @@ class _SendPageState extends State<SendPage> {
       ),
     );
   }
+
+  Future<void> addOrder() async {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  var db = FirebaseFirestore.instance;
+  DocumentReference counterRef = firestore.collection('Counters').doc('order_counter');
+  // Run a transaction to prevent race conditions
+  firestore.runTransaction((transaction) async {
+    // Get the current running number
+    DocumentSnapshot snapshot = await transaction.get(counterRef);
+    if (!snapshot.exists) {
+      throw Exception("Counter document does not exist!");
+    }
+
+    int currentNumber = snapshot.get('running_number');
+
+    // Increment the running number and update the counter document
+    int newNumber = currentNumber + 1;
+    transaction.update(counterRef, {'running_number': newNumber});
+  }).catchError((error) {
+    print("Failed to add order: $error");
+  });
+
+   var data = {
+      'sender': phonenumber.toString(),
+      'receiver':selectedPhoneNumber.toString(),
+      'r_location_lat':lati, 
+      'r_location_lng':long,
+      's_location_lat':latiSend, 
+      's_location_lng':longSend,
+      'pic_1':"",
+      'pic_2':"",
+      'name':packageNameCtl.text,
+      'descrip':packageDescriptionCtl.text,
+      'rider':"",
+      'plate_number':"",
+      'order_status':"1"
+    };
+
+    try {
+      log('Start Order');
+      DocumentSnapshot orderNum = await firestore.collection('Counters').doc('order_counter').get();
+      String orderID = orderNum['running_number'].toString();
+      db.collection('Orders').doc(orderID).set(data);
+    } catch (e) {
+      log(e.toString());
+      //รูป
+      //ดักปุ่ม
+    }
+}
+
 }
