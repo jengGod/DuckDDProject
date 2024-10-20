@@ -55,7 +55,7 @@ class _userProfileState extends State<userProfile> {
   final TextEditingController phoneCtl = TextEditingController();
 
   // Visibility state for password fields
-  bool _isOldPasswordVisible = false;
+  bool _isPhonenumber = false;
   bool _isNewPasswordVisible = false;
 
   bool _isFormComplete() {
@@ -202,14 +202,28 @@ class _userProfileState extends State<userProfile> {
               const SizedBox(height: 16),
 
               // Phone number field
-              Padding(
+               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
                   controller: _phonenumberController,
                   decoration: const InputDecoration(
-                    labelText: 'Phone Number',
+                    labelText: 'Phonenumber',
                     border: OutlineInputBorder(),
+                    // suffixIcon: IconButton(
+                    //   icon: Icon(
+                    //     _isPhonenumber
+                    //         ? Icons.visibility
+                    //         : Icons.visibility_off,
+                    //   ),
+                    //   onPressed: () {
+                    //     setState(() {
+                    //       _isPhonenumber =
+                    //           !_isPhonenumber; // Toggle visibility state
+                    //     });
+                    //   },
+                    // ),
                   ),
+                  readOnly: true, // ป้องกันไม่ให้พิมพ์หรือลบข้อความ
                 ),
               ),
               const SizedBox(height: 16),
@@ -222,7 +236,7 @@ class _userProfileState extends State<userProfile> {
                   child: ElevatedButton(
                     onPressed: () => Changepass(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 155, 155, 153),
+                      backgroundColor: const Color.fromARGB(255, 155, 155, 153),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -273,7 +287,7 @@ class _userProfileState extends State<userProfile> {
 
                     ,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 77, 209, 0),
+                      backgroundColor: const Color.fromARGB(255, 77, 209, 0),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -417,7 +431,7 @@ class _userProfileState extends State<userProfile> {
       var data = {
         'username': _usernameController.text,
         'email': _emailController.text,
-        'phonenumber': _phonenumberController.text, // อัปเดตเบอร์โทรใหม่
+        'phonenumber': _phonenumberController.text, 
         'profile_picture': updatedImageUrl,
         'password': hashedPassword
       };
@@ -425,12 +439,12 @@ class _userProfileState extends State<userProfile> {
       // อัปเดตข้อมูลใน document เดิม
       await db.collection('Users').doc(documentId).update(data);
 
-      // เปลี่ยนชื่อ document ตามเบอร์โทรใหม่
-      await db.collection('Users').doc(documentId).delete(); // ลบเอกสารเก่า
-      await db
-          .collection('Users')
-          .doc(_phonenumberController.text)
-          .set(data); // สร้างเอกสารใหม่
+      // // เปลี่ยนชื่อ document ตามเบอร์โทรใหม่
+      // await db.collection('Users').doc(documentId).delete(); // ลบเอกสารเก่า
+      // await db
+      //     .collection('Users')
+      //     .doc(_phonenumberController.text)
+      //     .set(data); // สร้างเอกสารใหม่
     } else {
       print('User not found in Firestore.');
     }
