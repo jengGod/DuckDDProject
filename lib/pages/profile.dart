@@ -170,7 +170,8 @@ class _userProfileState extends State<userProfile> {
                           imageUrl = await uploadImage(image!);
                           setState(() {});
                         }
-                      }),
+                      }
+                      ),
                 ],
               ),
               const SizedBox(height: 20),

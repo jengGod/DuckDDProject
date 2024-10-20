@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
@@ -6,8 +7,11 @@ import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:duckddproject/pages/reciverListPage.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +46,11 @@ class _SendPageState extends State<SendPage> {
   double latiSend = 0;
   double longSend = 0;
 
+  
+  XFile? image;
+  final ImagePicker picker = ImagePicker();
+  String imageUrl = '';
+  
   Future<void> openReciverList() async {
     final result = await Navigator.push(
       context,
@@ -153,9 +162,18 @@ class _SendPageState extends State<SendPage> {
                         size: 60,
                         color: Colors.black45,
                       ),
-                      onPressed: () {
-                        print('Cloud upload clicked');
-                      },
+                      onPressed: () async {
+                        log('start:');
+                        final ImagePicker picker = ImagePicker();
+                        image =
+                            await picker.pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          log('image:');
+                          log(image!.path);
+                          imageUrl = await uploadImage(image!);
+                          setState(() {});
+                        }
+                      }
                     ),
                     const SizedBox(width: 20),
                     IconButton(
@@ -164,9 +182,18 @@ class _SendPageState extends State<SendPage> {
                         size: 60,
                         color: Colors.black45,
                       ),
-                      onPressed: () {
-                        print('Camera icon clicked');
-                      },
+                      onPressed: () async {
+                        log('start:');
+                        final ImagePicker picker = ImagePicker();
+                        image =
+                            await picker.pickImage(source: ImageSource.camera);
+                        if (image != null) {
+                          log('image:');
+                          log(image!.path);
+                          imageUrl = await uploadImage(image!);
+                          setState(() {});
+                        }
+                      }
                     ),
                   ],
                 ),
@@ -174,6 +201,10 @@ class _SendPageState extends State<SendPage> {
               const SizedBox(height: 16),
               TextField(
                 controller: packageNameCtl,
+                 inputFormatters: [
+                    FilteringTextInputFormatter.deny(
+                        RegExp(r'\s')), // Prevent space input
+                  ],
                 decoration: const InputDecoration(
                   labelText: 'Package Name',
                   border: OutlineInputBorder(),
@@ -182,6 +213,10 @@ class _SendPageState extends State<SendPage> {
               const SizedBox(height: 16),
               TextField(
                 controller: packageDescriptionCtl,
+                 inputFormatters: [
+                    FilteringTextInputFormatter.deny(
+                        RegExp(r'\s')), // Prevent space input
+                  ],
                 decoration: const InputDecoration(
                   labelText: 'Package Description',
                   border: OutlineInputBorder(),
@@ -308,45 +343,92 @@ class _SendPageState extends State<SendPage> {
     );
   }
 
-  void Confirm(BuildContext context) {
-    addOrder();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            // To avoid overflow
-            child: Column(
-              mainAxisSize: MainAxisSize.min, // Reduce height to fit content
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+  // ฟังก์ชัน Confirm ตรวจสอบข้อมูลที่ผู้ใช้กรอกก่อนดำเนินการยืนยันการสั่งซื้อ
+void Confirm(BuildContext context) {
+  if (selectedUsername == null || selectedPhoneNumber == null) {
+  _showErrorDialog(context, 'Please Choose Receiver');
+  return; // Stop the confirmation process if no receiver is selected
+}
+  // ตรวจสอบว่าชื่อพัสดุ (packageName) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
+  if (packageNameCtl.text.isEmpty) {
+    _showErrorDialog(context, 'Package name cannot be empty.');
+    return; // หยุดการทำงานหากไม่มีการกรอกชื่อพัสดุ
+  }
+
+  // ตรวจสอบว่ารายละเอียดพัสดุ (packageDescription) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
+  if (packageDescriptionCtl.text.isEmpty) {
+    _showErrorDialog(context, 'Package description cannot be empty.');
+    return; // หยุดการทำงานหากไม่มีการกรอกรายละเอียดพัสดุ
+  }
+
+  // ตรวจสอบว่ามีการเลือกรูปภาพแล้วหรือยัง หากไม่มีจะแสดงหน้าต่างแจ้งเตือน
+  if (image == null) {
+    _showErrorDialog(context, 'Please upload an image.');
+    return; // หยุดการทำงานหากไม่มีรูปภาพที่อัปโหลด
+  }
+
+  // หากข้อมูลครบถ้วน เรียกฟังก์ชัน addOrder เพื่อบันทึกคำสั่งซื้อ
+  addOrder();
+  
+  // แสดงหน้าต่างยืนยันคำสั่งซื้อเสร็จสิ้น
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // กำหนดขนาดของคอลัมน์ให้พอดีกับเนื้อหา
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end, // จัดให้ปุ่มปิดอยู่ทางด้านขวา
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // ปิดหน้าต่างเมื่อกดปุ่มปิด
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10), // เว้นระยะห่างแนวตั้ง 10 พิกเซล
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0), // เพิ่มระยะห่างด้านล่าง 20 พิกเซล
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // จัดตำแหน่งข้อความให้อยู่กึ่งกลาง
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                    Text('COMPLETE SEND ORDER!!!'), // แสดงข้อความ "COMPLETE SEND ORDER!!!"
                   ],
                 ),
-                const SizedBox(height: 10),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('COMPLETE SEND ORDER!!!'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
+// ฟังก์ชัน _showErrorDialog ใช้แสดงหน้าต่างแจ้งเตือนเมื่อข้อมูลไม่ครบ
+void _showErrorDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('ไม่สามารถส่งข้อมูลได้'), // หัวข้อของหน้าต่างเป็น "Error"
+        content: Text(message), // เนื้อหาเป็นข้อความที่ถูกส่งมาผ่านพารามิเตอร์
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // ปิดหน้าต่างเมื่อกดปุ่ม OK
+            },
+            child: const Text('OK'), // ปุ่ม OK ที่ผู้ใช้สามารถกดเพื่อปิดหน้าต่าง
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   Future<void> loadLocation() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -461,8 +543,8 @@ class _SendPageState extends State<SendPage> {
       'r_location_lng':long,
       's_location_lat':latiSend, 
       's_location_lng':longSend,
-      'pic_1':"",
-      'pic_2':"",
+      'pic_1':image,
+      'pic_2':image,
       'name':packageNameCtl.text,
       'descrip':packageDescriptionCtl.text,
       'rider':"",
@@ -481,5 +563,20 @@ class _SendPageState extends State<SendPage> {
       //ดักปุ่ม
     }
 }
+
+  Future<String> uploadImage(XFile image) async {
+    // สร้าง Reference สำหรับ Firebase Storage
+    final storageRef = FirebaseStorage.instance.ref();
+
+    // สร้าง path สำหรับเก็บรูปภาพ
+    final imageRef = storageRef.child('pic_1/${image.name}');
+
+    // อัปโหลดรูปภาพ
+    await imageRef.putFile(File(image.path));
+
+    // รับ URL ของรูปภาพที่ถูกอัปโหลด
+    String downloadURL = await imageRef.getDownloadURL();
+    return downloadURL;
+  }
 
 }
