@@ -342,8 +342,8 @@ class _SendPageState extends State<SendPage> {
       },
     );
   }
-
-  // ฟังก์ชัน Confirm ตรวจสอบข้อมูลที่ผู้ใช้กรอกก่อนดำเนินการยืนยันการสั่งซื้อ
+  
+  
 void Confirm(BuildContext context) {
   if (selectedUsername == null || selectedPhoneNumber == null) {
   _showErrorDialog(context, 'Please Choose Receiver');
