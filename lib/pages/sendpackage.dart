@@ -349,6 +349,7 @@ void Confirm(BuildContext context) {
   _showErrorDialog(context, 'Please Choose Receiver');
   return; // Stop the confirmation process if no receiver is selected
 }
+
   // ตรวจสอบว่าชื่อพัสดุ (packageName) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
   if (packageNameCtl.text.isEmpty) {
     _showErrorDialog(context, 'Package name cannot be empty.');
@@ -385,7 +386,10 @@ void Confirm(BuildContext context) {
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () {
-                      Navigator.of(context).pop(); // ปิดหน้าต่างเมื่อกดปุ่มปิด
+                     Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserHomePage()),
+                      ); // ปิดหน้าต่างเมื่อกดปุ่มปิด
                     },
                   ),
                 ],
@@ -543,8 +547,8 @@ void _showErrorDialog(BuildContext context, String message) {
       'r_location_lng':long,
       's_location_lat':latiSend, 
       's_location_lng':longSend,
-      'pic_1':image,
-      'pic_2':image,
+      'pic_1':imageUrl,
+      'pic_2':"",
       'name':packageNameCtl.text,
       'descrip':packageDescriptionCtl.text,
       'rider':"",

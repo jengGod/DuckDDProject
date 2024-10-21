@@ -20,6 +20,7 @@ class Registeruser extends StatefulWidget {
 TextEditingController usernameCtl = TextEditingController();
 TextEditingController passCtl = TextEditingController();
 TextEditingController emailCtl = TextEditingController();
+TextEditingController addressCtl = TextEditingController();
 TextEditingController walletCtl = TextEditingController();
 TextEditingController passwordCtl = TextEditingController();
 TextEditingController phoneCtl = TextEditingController();
@@ -31,12 +32,15 @@ final ImagePicker picker = ImagePicker();
 String imageUrl = '';
 double lati=0;
 double long=0;
+bool ispassCtl = false;
+bool ispasswordCtl = false;
 class _RegisteruserState extends State<Registeruser> {
   // ตรวจสอบว่าข้อมูลกรอกครบทุกช่องหรือยัง
   bool _isFormComplete() {
     return usernameCtl.text.isNotEmpty &&
         emailCtl.text.isNotEmpty &&
         phoneCtl.text.isNotEmpty &&
+        addressCtl.text.isNotEmpty &&
         passwordCtl.text.isNotEmpty &&
         passCtl.text.isNotEmpty &&
         image != null;
@@ -131,6 +135,24 @@ class _RegisteruserState extends State<Registeruser> {
               ),
               const SizedBox(height: 20),
               TextField(
+                controller: addressCtl,
+                keyboardType: TextInputType.emailAddress,
+                inputFormatters: const [
+                  // FilteringTextInputFormatter.deny(
+                  //     RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                ],
+                decoration: const InputDecoration(
+                  labelText: 'address',
+                  filled: true,
+                  fillColor: Color(0xFFF0ECF6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
                 controller: phoneCtl,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
@@ -150,37 +172,64 @@ class _RegisteruserState extends State<Registeruser> {
               const SizedBox(height: 20),
               TextField(
                 controller: passwordCtl,
-                obscureText: true,
+                 obscureText:
+                      !ispasswordCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
-                decoration: const InputDecoration(
+                decoration:  InputDecoration(
                   labelText: 'Password',
                   filled: true,
-                  fillColor: Color(0xFFF0ECF6),
-                  border: OutlineInputBorder(
+                  fillColor: const Color(0xFFF0ECF6),
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(30.0)),
                     borderSide: BorderSide.none,
                   ),
+                  suffixIcon: IconButton(
+                      icon: Icon(
+                        ispasswordCtl
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          ispasswordCtl = !ispasswordCtl;
+                        });
+                      },
+                    ),
                 ),
+                
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: passCtl,
-                obscureText: true,
+                obscureText:
+                      !ispassCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
-                decoration: const InputDecoration(
+                decoration:  InputDecoration(
                   labelText: 'Confirm Password',
                   filled: true,
-                  fillColor: Color(0xFFF0ECF6),
-                  border: OutlineInputBorder(
+                  fillColor: const Color(0xFFF0ECF6),
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(30.0)),
                     borderSide: BorderSide.none,
                   ),
+                  suffixIcon: IconButton(
+                      icon: Icon(
+                        ispassCtl
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          ispassCtl = !ispassCtl;
+                        });
+                      },
+                    ),
                 ),
               ),
               CheckboxListTile(
@@ -280,6 +329,7 @@ class _RegisteruserState extends State<Registeruser> {
       'username': usernameCtl.text,
       'email': emailCtl.text,
       'phonenumber': phoneCtl.text,
+      'address':addressCtl.text,
       'password': hashedPassword,
       'profile_picture': imageUrl
     };
