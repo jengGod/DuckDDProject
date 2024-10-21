@@ -385,7 +385,10 @@ void Confirm(BuildContext context) {
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () {
-                      Navigator.of(context).pop(); // ปิดหน้าต่างเมื่อกดปุ่มปิด
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserHomePage()),
+                      ); // ปิดหน้าต่างเมื่อกดปุ่มปิด
                     },
                   ),
                 ],
@@ -406,6 +409,7 @@ void Confirm(BuildContext context) {
       );
     },
   );
+  
 }
 
 // ฟังก์ชัน _showErrorDialog ใช้แสดงหน้าต่างแจ้งเตือนเมื่อข้อมูลไม่ครบ
@@ -543,8 +547,8 @@ void _showErrorDialog(BuildContext context, String message) {
       'r_location_lng':long,
       's_location_lat':latiSend, 
       's_location_lng':longSend,
-      'pic_1':image,
-      'pic_2':image,
+      'pic_1':imageUrl,
+      'pic_2':"",
       'name':packageNameCtl.text,
       'descrip':packageDescriptionCtl.text,
       'rider':"",

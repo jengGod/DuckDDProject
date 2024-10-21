@@ -155,7 +155,7 @@ class _RegisterdriverState extends State<Registerdriver> {
                       RegExp(r'\s')), // ห้ามพิมพ์ spacebar
                 ],
                 decoration: const InputDecoration(
-                  labelText: 'License Plate Number',
+                  labelText: 'Plate Number',
                   filled: true,
                   fillColor: Color(0xFFF0ECF6),
                   border: OutlineInputBorder(
