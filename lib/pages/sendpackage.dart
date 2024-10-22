@@ -149,62 +149,120 @@ class _SendPageState extends State<SendPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Container(
-                height: 150,
-                width: double.infinity,
+             Container(
+  height: 150,
+  width: double.infinity,
                 color: Colors.grey[300],
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.cloud_upload_outlined,
-                        size: 60,
-                        color: Colors.black45,
+                child: image != null
+                    ? Expanded(
+                        child: Image.file(
+                          File(image!.path),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        ),
+                      )
+                    : Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.cloud_upload_outlined,
+                                size: 60,
+                                color: Colors.black45,
+                              ),
+                              onPressed: () async {
+                                log('start gallery upload:');
+                                image = await picker.pickImage(
+                                    source: ImageSource.gallery);
+                                if (image != null) {
+                                  log('image path:');
+                                  log(image!.path);
+                                  imageUrl = await uploadImage(image!);
+                                  setState(() {});
+                                }
+                              },
+                            ),
+                            const SizedBox(width: 20),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.camera_alt_outlined,
+                                size: 60,
+                                color: Colors.black45,
+                              ),
+                              onPressed: () async {
+                                log('start camera upload:');
+                                image = await picker.pickImage(
+                                    source: ImageSource.camera);
+                                if (image != null) {
+                                  log('image path:');
+                                  log(image!.path);
+                                  imageUrl = await uploadImage(image!);
+                                  setState(() {});
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                      onPressed: () async {
-                        log('start:');
-                        final ImagePicker picker = ImagePicker();
-                        image =
-                            await picker.pickImage(source: ImageSource.gallery);
-                        if (image != null) {
-                          log('image:');
-                          log(image!.path);
-                          imageUrl = await uploadImage(image!);
-                          setState(() {});
-                        }
-                      }
-                    ),
-                    const SizedBox(width: 20),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.camera_alt_outlined,
-                        size: 60,
-                        color: Colors.black45,
-                      ),
-                      onPressed: () async {
-                        log('start:');
-                        final ImagePicker picker = ImagePicker();
-                        image =
-                            await picker.pickImage(source: ImageSource.camera);
-                        if (image != null) {
-                          log('image:');
-                          log(image!.path);
-                          imageUrl = await uploadImage(image!);
-                          setState(() {});
-                        }
-                      }
-                    ),
-                  ],
-                ),
               ),
+              const SizedBox(height: 16),
+
+// Move buttons outside the container when the image is uploaded
+              if (image != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 60,
+                          color: Colors.black45,
+                        ),
+                        onPressed: () async {
+                          log('start gallery upload:');
+                          image = await picker.pickImage(
+                              source: ImageSource.gallery);
+                          if (image != null) {
+                            log('image path:');
+                            log(image!.path);
+                            imageUrl = await uploadImage(image!);
+                            setState(() {});
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 20),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.camera_alt_outlined,
+                          size: 60,
+                          color: Colors.black45,
+                        ),
+                        onPressed: () async {
+                          log('start camera upload:');
+                          image = await picker.pickImage(
+                              source: ImageSource.camera);
+                          if (image != null) {
+                            log('image path:');
+                            log(image!.path);
+                            imageUrl = await uploadImage(image!);
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
               const SizedBox(height: 16),
               TextField(
                 controller: packageNameCtl,
-                 inputFormatters: [
-                    FilteringTextInputFormatter.deny(
-                        RegExp(r'\s')), // Prevent space input
-                  ],
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // Prevent space input
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Package Name',
                   border: OutlineInputBorder(),
@@ -213,10 +271,10 @@ class _SendPageState extends State<SendPage> {
               const SizedBox(height: 16),
               TextField(
                 controller: packageDescriptionCtl,
-                 inputFormatters: [
-                    FilteringTextInputFormatter.deny(
-                        RegExp(r'\s')), // Prevent space input
-                  ],
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')), // Prevent space input
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Package Description',
                   border: OutlineInputBorder(),
@@ -244,7 +302,8 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (selectedUsername != null && selectedPhoneNumber != null) ...[ //--------------------------*map here
+              if (selectedUsername != null && selectedPhoneNumber != null) ...[
+                //--------------------------*map here
                 Text('Receiver name: $selectedUsername'),
                 Text('Receiver phonenumber: $selectedPhoneNumber'),
                 const SizedBox(height: 16),

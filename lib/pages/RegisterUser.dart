@@ -71,6 +71,22 @@ class _RegisteruserState extends State<Registeruser> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              if (image != null)
+                ClipOval(
+                  child: Container(
+                    height: 100,
+                    width: 100, 
+                    color: Colors.grey[300],
+                    child: Image.file(
+                      File(image!.path),
+                      fit: BoxFit.cover,
+                      width: 150, 
+                      height: 150, 
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 20),
               FilledButton(
                   onPressed: () async {
                     log('start:');
@@ -301,58 +317,60 @@ class _RegisteruserState extends State<Registeruser> {
   }
 
   void register(BuildContext context) async {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    if (passwordCtl.text != passCtl.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
-
-    DocumentSnapshot userDoc =
-        await firestore.collection('Users').doc(phoneCtl.text).get();
-    DocumentSnapshot driverDoc =
-        await firestore.collection('Drivers').doc(phoneCtl.text).get();
-
-    if (userDoc.exists || driverDoc.exists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'Phone number already exists. Please use another Phone number.')),
-      );
-      return; // หยุดการสมัครสมาชิก
-    }
-    String hashedPassword =
-        sha256.convert(utf8.encode(passwordCtl.text)).toString();
-    var db = FirebaseFirestore.instance;
-    var data = {
-      'username': usernameCtl.text,
-      'email': emailCtl.text,
-      'phonenumber': phoneCtl.text,
-      'address':addressCtl.text,
-      'password': hashedPassword,
-      'profile_picture': imageUrl
-    };
-
-    if(isLocationChecked){
-      var location_user = {
-            'location_loti': lati,
-            'location_long': long
-          };
-      db.collection('Users_location').doc(phoneCtl.text).set(location_user);
-    }
-    
-    db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
-      Navigator.pop(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    }).catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
-      );
-    });
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  if (passwordCtl.text != passCtl.text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Passwords do not match')),
+    );
+    return;
   }
+
+  DocumentSnapshot userDoc =
+      await firestore.collection('Users').doc(phoneCtl.text).get();
+  DocumentSnapshot driverDoc =
+      await firestore.collection('Drivers').doc(phoneCtl.text).get();
+
+  if (userDoc.exists || driverDoc.exists) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text(
+              'Phone number already exists. Please use another Phone number.')),
+    );
+    return; // Stop registration
+  }
+  
+  String hashedPassword =
+      sha256.convert(utf8.encode(passwordCtl.text)).toString();
+  var db = FirebaseFirestore.instance;
+  var data = {
+    'username': usernameCtl.text,
+    'email': emailCtl.text,
+    'phonenumber': phoneCtl.text,
+    'address': addressCtl.text,
+    'password': hashedPassword,
+    'profile_picture': imageUrl
+  };
+
+  if (isLocationChecked) {
+    var location_user = {
+      'location_loti': lati,
+      'location_long': long
+    };
+    db.collection('Users_location').doc(phoneCtl.text).set(location_user);
+  }
+  
+  db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
+    // Navigate to LoginPage and refresh
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }).catchError((error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $error')),
+    );
+  });
+}
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
