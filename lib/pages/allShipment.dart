@@ -145,7 +145,7 @@ class _nameState extends State<AllshipmentPage> {
 
     return SizedBox(
       width: 400, // Set the desired width
-      height: 400, // Set the desired height
+      height: 800, // Set the desired height
       child: FlutterMap(
         mapController: mapController,
         options: MapOptions(
