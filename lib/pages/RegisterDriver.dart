@@ -309,7 +309,7 @@ class _RegisterdriverState extends State<Registerdriver> {
     };
 
     db.collection('Drivers').doc(phoneCtl.text).set(data).then((_) {
-      Navigator.pop(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );

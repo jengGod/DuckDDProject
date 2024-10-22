@@ -30,6 +30,7 @@ class _SendPageState extends State<SendPage> {
 
   String? selectedUsername;
   String? selectedPhoneNumber;
+  String? selectedAddress;
 
   LatLng? latLng;
   LatLng? latLngSend;
@@ -40,6 +41,7 @@ class _SendPageState extends State<SendPage> {
   String? email;
   String? phonenumber;
   String? profilePicture;
+  String? address;
 
   double lati = 0;
   double long = 0;
@@ -60,6 +62,7 @@ class _SendPageState extends State<SendPage> {
       setState(() {
         selectedUsername = result['username'];
         selectedPhoneNumber = result['phonenumber'];
+        selectedAddress = result['address'];
         loadLocation();
       });
     }
@@ -78,6 +81,7 @@ class _SendPageState extends State<SendPage> {
       email = prefs.getString('email');
       phonenumber = prefs.getString('phonenumber');
       profilePicture = prefs.getString('profile_picture');
+      address = prefs.getString('address');
     });
   }
 
@@ -302,10 +306,11 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (selectedUsername != null && selectedPhoneNumber != null) ...[
+              if (selectedUsername != null && selectedPhoneNumber != null && selectedAddress != null) ...[
                 //--------------------------*map here
                 Text('Receiver name: $selectedUsername'),
                 Text('Receiver phonenumber: $selectedPhoneNumber'),
+                Text('Receiver address: $selectedPhoneNumber'),
                 const SizedBox(height: 16),
                 showMap(),
               ],
@@ -404,7 +409,7 @@ class _SendPageState extends State<SendPage> {
   
   
 void Confirm(BuildContext context) {
-  if (selectedUsername == null || selectedPhoneNumber == null) {
+  if (selectedUsername == null || selectedPhoneNumber == null || selectedAddress == null){
   _showErrorDialog(context, 'Please Choose Receiver');
   return; // Stop the confirmation process if no receiver is selected
 }
@@ -615,10 +620,12 @@ void _showErrorDialog(BuildContext context, String message) {
       'plate_number':"",
       'order_status':"1",
       's_name':username.toString(),
-      'r_name':selectedUsername.toString()
+      'r_name':selectedUsername.toString(),
+      'r_address':selectedAddress.toString(),
+      's_address':address.toString(),
     };
 //name s,r
-//driver
+//address s,r
     try {
       log('Start Order');
       DocumentSnapshot orderNum = await firestore.collection('Counters').doc('order_counter').get();

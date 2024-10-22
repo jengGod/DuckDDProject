@@ -105,7 +105,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text('Sender name'),
-                                  Text('${order['sender'] ?? 'Unknown'}',
+                                  Text('${order['s_name'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
                                   Text('Sender phonenumber'),
                                   Text('${order['sender'] ?? 'Unknown'}',
@@ -119,7 +119,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text('Receiver name'),
-                                  Text('${order['receiver'] ?? 'Unknown'}',
+                                  Text('${order['r_name'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
                                   Text('Receiver phonenumber'),
                                   Text('${order['receiver'] ?? 'Unknown'}',
