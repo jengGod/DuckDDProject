@@ -147,7 +147,7 @@ class _DriverPageState extends State<DriverPage> {
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
                                     child: Text(
-                                      'destination: ${(order['r_location_lat'] ?? 'Unknown')}, Lng: ${(order['r_location_lng'] ?? 'Unknown')}',
+                                      'destination: ${(order['r_address'] ?? 'Unknown')}',
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Color.fromARGB(255, 3, 3, 3),

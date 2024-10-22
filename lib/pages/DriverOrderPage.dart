@@ -110,6 +110,9 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                   Text('Sender phonenumber'),
                                   Text('${order['sender'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
+                                  Text('Sender address'),
+                                  Text('${order['s_address'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                             ),
@@ -124,14 +127,15 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                   Text('Receiver phonenumber'),
                                   Text('${order['receiver'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
+                                  Text('Receiver address'),
+                                  Text('${order['r_address'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                
-                        
+                        const SizedBox(height: 5),
                         // Delivered camera button
                         Padding(
                           padding: const EdgeInsets.all(5.0),
