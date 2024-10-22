@@ -6,12 +6,14 @@ import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:duckddproject/pages/sendpackage.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserHomePage extends StatefulWidget {
+  
    // Add password as a final property
 
-  const UserHomePage({super.key, }); // Mark it as required
+  const UserHomePage({super.key,}); // Mark it as required
 
   @override
   State<UserHomePage> createState() => _UserHomePageState();
