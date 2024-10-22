@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:duckddproject/pages/Changelocation.dart';
+import 'package:duckddproject/pages/Location.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +11,11 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crypto/crypto.dart';
+import 'package:latlong2/latlong.dart';
 
 class Registeruser extends StatefulWidget {
-  const Registeruser({super.key});
+  final LatLng? selectedLocation;
+  const Registeruser({super.key, this.selectedLocation });
 
   @override
   State<Registeruser> createState() => _RegisteruserState();
@@ -248,20 +252,43 @@ class _RegisteruserState extends State<Registeruser> {
                     ),
                 ),
               ),
-              CheckboxListTile(
-                  title: const Text('ใช้ตำแหน่งปัจจุบันเป็นที่อยู่'),
-                  value: isLocationChecked,
-                  onChanged: (bool? value) async {
-                    setState(() {
-                      isLocationChecked = value ?? false;
-                    });
-                    if (isLocationChecked) {
-                      var position = await _determinePosition();
-                      log('${position.latitude} ${position.longitude}');
-                      lati = position.latitude;
-                      long = position.longitude;
-                    }
-                  }),
+              const SizedBox(height: 10),
+              // CheckboxListTile(
+              //     title: const Text('ใช้ตำแหน่งปัจจุบันเป็นที่อยู่'),
+              //     value: isLocationChecked,
+              //     onChanged: (bool? value) async {
+              //       setState(() {
+              //         isLocationChecked = value ?? false;
+              //       });
+              //       if (isLocationChecked) {
+              //         var position = await _determinePosition();
+              //         log('${position.latitude} ${position.longitude}');
+              //         lati = position.latitude;
+              //         long = position.longitude;
+              //       }
+              //     }),
+               ElevatedButton(
+                // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
+                onPressed: () { GpsMap(context);},
+
+                        
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Text(
+                  'location',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+                 const SizedBox(height: 5),
               ElevatedButton(
                 // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
                 onPressed: !_isFormComplete() || _isButtonPressed
@@ -318,6 +345,7 @@ class _RegisteruserState extends State<Registeruser> {
 
   void register(BuildContext context) async {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   if (passwordCtl.text != passCtl.text) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Passwords do not match')),
@@ -338,7 +366,7 @@ class _RegisteruserState extends State<Registeruser> {
     );
     return; // Stop registration
   }
-  
+
   String hashedPassword =
       sha256.convert(utf8.encode(passwordCtl.text)).toString();
   var db = FirebaseFirestore.instance;
@@ -348,19 +376,30 @@ class _RegisteruserState extends State<Registeruser> {
     'phonenumber': phoneCtl.text,
     'address': addressCtl.text,
     'password': hashedPassword,
-    'profile_picture': imageUrl
+    'profile_picture': imageUrl,
   };
 
-  if (isLocationChecked) {
+  if (widget.selectedLocation != null) {
+    // Store the selected location coordinates if available
+  log('Selected Latitude: ${widget.selectedLocation!.latitude}');
+  log('Selected Longitude: ${widget.selectedLocation!.longitude}');
     var location_user = {
-      'location_loti': lati,
-      'location_long': long
+      'location_loti': widget.selectedLocation!.latitude,
+      'location_long': widget.selectedLocation!.longitude,
+    };
+    db.collection('Users_location').doc(phoneCtl.text).set(location_user);
+  } else {
+    // If no location was selected manually, use current GPS location
+    var position = await _determinePosition();
+    var location_user = {
+      'location_loti': position.latitude,
+      'location_long': position.longitude,
     };
     db.collection('Users_location').doc(phoneCtl.text).set(location_user);
   }
-  
+
   db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
-    // Navigate to LoginPage and refresh
+    // Navigate to LoginPage or another page as needed
     Navigator.pop(context);
   }).catchError((error) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -368,6 +407,7 @@ class _RegisteruserState extends State<Registeruser> {
     );
   });
 }
+
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -404,5 +444,12 @@ class _RegisteruserState extends State<Registeruser> {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
+  }
+  
+  void GpsMap(BuildContext context) {
+     Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Location()),
+    );
   }
 }
