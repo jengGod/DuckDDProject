@@ -618,8 +618,11 @@ class _SendPageState extends State<SendPage> {
     }).catchError((error) {
       print("Failed to add order: $error");
     });
-
+    DocumentSnapshot orderNum =
+          await firestore.collection('Counters').doc('order_counter').get();
+    String orderID = orderNum['running_number'].toString();
     var data = {
+      'orderId':orderID,
       'sender': phonenumber.toString(),
       'receiver': selectedPhoneNumber.toString(),
       'r_location_lat': lati,
@@ -641,9 +644,7 @@ class _SendPageState extends State<SendPage> {
     log(address.toString());
     try {
       log('Start Order');
-      DocumentSnapshot orderNum =
-          await firestore.collection('Counters').doc('order_counter').get();
-      String orderID = orderNum['running_number'].toString();
+      
       db.collection('Orders').doc(orderID).set(data);
     } catch (e) {
       log(e.toString());

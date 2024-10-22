@@ -262,7 +262,12 @@ class _DriverPageState extends State<DriverPage> {
     };
     log('plate num:'+plate_number.toString());
     log('phone num:'+phonenumber.toString());
-    
+    try {
+      log('Start Order');
+      db.collection('Orders').doc(order['orderId']).set(data, SetOptions(merge: true));
+    } catch (e) {
+       log(e.toString());
+    }
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => DriverOrderPage(order: order)),
