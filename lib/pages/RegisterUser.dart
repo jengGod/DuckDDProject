@@ -39,6 +39,7 @@ double long=0;
 bool ispassCtl = false;
 bool ispasswordCtl = false;
 class _RegisteruserState extends State<Registeruser> {
+  bool isLocationSelected = false;
   // ตรวจสอบว่าข้อมูลกรอกครบทุกช่องหรือยัง
   bool _isFormComplete() {
     return usernameCtl.text.isNotEmpty &&
@@ -47,7 +48,8 @@ class _RegisteruserState extends State<Registeruser> {
         addressCtl.text.isNotEmpty &&
         passwordCtl.text.isNotEmpty &&
         passCtl.text.isNotEmpty &&
-        image != null;
+        image != null&&
+       widget.selectedLocation != null;
   }
 
   @override
