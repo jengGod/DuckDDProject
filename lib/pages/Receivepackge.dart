@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/checkrecivemore.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,9 @@ import 'packagelist.dart';
 import 'profile.dart';
 
 class Receciveuser extends StatefulWidget {
-  const Receciveuser({super.key});
+  
+
+  const Receciveuser({super.key,});
 
   @override
   State<Receciveuser> createState() => _RececiveuserState();
@@ -178,7 +182,7 @@ class _RececiveuserState extends State<Receciveuser> {
                                   alignment: Alignment.centerRight,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      More(context);
+                                      More(context, order);
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.black,
@@ -238,10 +242,12 @@ class _RececiveuserState extends State<Receciveuser> {
     );
   }
   
-  void More(BuildContext context) {
+  void More(BuildContext context, Map<String, dynamic> order) {
+    log(order['sender']);
+    log(order['receiver']);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Checkmore()),
+      MaterialPageRoute(builder: (context) => Checkmore(order: order)),
     );
   }
 }
