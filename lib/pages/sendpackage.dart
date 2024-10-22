@@ -310,7 +310,7 @@ class _SendPageState extends State<SendPage> {
                 //--------------------------*map here
                 Text('Receiver name: $selectedUsername'),
                 Text('Receiver phonenumber: $selectedPhoneNumber'),
-                Text('Receiver address: $selectedPhoneNumber'),
+                Text('Receiver address: $selectedAddress'),
                 const SizedBox(height: 16),
                 showMap(),
               ],
@@ -622,10 +622,9 @@ void _showErrorDialog(BuildContext context, String message) {
       's_name':username.toString(),
       'r_name':selectedUsername.toString(),
       'r_address':selectedAddress.toString(),
-      's_address':address.toString(),
+      's_address':address.toString()
     };
-//name s,r
-//address s,r
+    log(address.toString());
     try {
       log('Start Order');
       DocumentSnapshot orderNum = await firestore.collection('Counters').doc('order_counter').get();
