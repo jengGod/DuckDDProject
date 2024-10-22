@@ -613,9 +613,12 @@ void _showErrorDialog(BuildContext context, String message) {
       'descrip':packageDescriptionCtl.text,
       'rider':"",
       'plate_number':"",
-      'order_status':"1"
+      'order_status':"1",
+      's_name':username.toString(),
+      'r_name':selectedUsername.toString()
     };
-
+//name s,r
+//driver
     try {
       log('Start Order');
       DocumentSnapshot orderNum = await firestore.collection('Counters').doc('order_counter').get();

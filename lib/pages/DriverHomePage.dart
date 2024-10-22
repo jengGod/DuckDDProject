@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/DriverOrderPage.dart';
 import 'package:duckddproject/pages/DriverProfile.dart';
@@ -222,10 +224,11 @@ class _DriverPageState extends State<DriverPage> {
   }
 
   void acceptOrder(BuildContext context, Map<String, dynamic> order) {
-
+    log(order['sender']);
+    log(order['receiver']);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const DriverOrderPage(order: {},)),
+      MaterialPageRoute(builder: (context) => DriverOrderPage(order: order)),
     );
   }
 }
