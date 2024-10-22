@@ -5,7 +5,8 @@ import 'package:duckddproject/pages/profile.dart';
 import 'package:flutter/material.dart';
 
 class Checkmore extends StatefulWidget {
-  const Checkmore({super.key});
+  final Map<String, dynamic> order;
+  const Checkmore({super.key, required this.order});
 
   @override
   State<Checkmore> createState() => _CheckmoreState();
@@ -16,11 +17,10 @@ class _CheckmoreState extends State<Checkmore> {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> order = widget.order;
     return Scaffold(
       appBar: AppBar(
         title: const Text('HOME'),
-        // centerTitle: true, // Centers the title
-        // automaticallyImplyLeading: false, // Removes back arrow
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -33,7 +33,7 @@ class _CheckmoreState extends State<Checkmore> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
-              label: 'list',
+              label: 'List',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),
@@ -51,25 +51,7 @@ class _CheckmoreState extends State<Checkmore> {
             if (index == 3) {
               _showLogoutDialog(context);
             } else {
-              setState(() {
-                selectedIndex = index;
-                if (selectedIndex == 0) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UserHomePage()),
-                  );
-                } else if (selectedIndex == 1) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Packagelist()),
-                  );
-                } else if (selectedIndex == 2) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const userProfile()),
-                  );
-                }
-              });
+              _onBottomNavTapped(index);
             }
           },
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
@@ -81,88 +63,68 @@ class _CheckmoreState extends State<Checkmore> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             Card(
+              Card(
+                color: Color.fromARGB(255, 255, 254, 254),
                 child: Container(
                   height: 180,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
-                    color: Colors.grey[300],
+                    color: Color.fromARGB(255, 202, 202, 202),
                   ),
-                  child: ClipRRect(
-                    
-                    borderRadius: BorderRadius.circular(
-                        4), 
-                    child: Image.network(
-                      'https://dd.lnwfile.com/_/dd/_raw/ov/zq/vt.jpg',
-                      fit: BoxFit
-                          .cover, 
-                      width: double.infinity, 
-                      height: 150, 
-                      errorBuilder: (BuildContext context, Object exception,
-                          StackTrace? stackTrace) {
-                        return const Text(
-                          'Failed to load image',
-                          style: TextStyle(color: Colors.black45),
-                        );
-                      },
-                    ),
-                  ),
+                  child: order['pic_1'] != null
+                      ? Image.network(
+                          order['pic_1'],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 150,
+                          errorBuilder: (BuildContext context, Object exception,
+                              StackTrace? stackTrace) {
+                            return const Text(
+                              'Failed to load image',
+                              style: TextStyle(color: Colors.black45),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Text(
+                            'No Image Available',
+                            style: TextStyle(color: Colors.black45),
+                          ),
+                        ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'PACKAGE NAME',
-                  labelStyle: TextStyle(
-                    color: Colors.black45,
-                    fontSize: 16,
+              Card(
+                color: Color.fromARGB(255, 198, 195, 195),
+                
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      
+                      const SizedBox(height: 16),
+                      _buildInfoRow('PACKAGE NAME', order['name']),
+                      const SizedBox(height: 16),
+                      _buildInfoRow('PACKAGE DESCRIPTION', order['descrip']),
+                      const SizedBox(height: 16),
+                      _buildInfoRow('SENDER NAME', order['s_name']),
+                      const SizedBox(height: 16),
+                      _buildInfoRow('SENDER PHONE NUMBER', order['sender']),
+                      const SizedBox(height: 16),
+                      _buildInfoRow(
+                        'PACKAGE STATUS',
+                        order['order_status'] == '1'
+                            ? 'Search for driver'
+                            : order['order_status'] == '2'
+                                ? 'Pickup package'
+                                : order['order_status'] == '3'
+                                    ? 'Delivering'
+                                    : order['order_status'] == '4'
+                                        ? 'Delivered'
+                                        : 'unknown',
+                      ),
+                    ],
                   ),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'PACKAGE DESCRIPTION',
-                  labelStyle: TextStyle(
-                    color: Colors.black45,
-                    fontSize: 16,
-                  ),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'SENDER NAME',
-                  labelStyle: TextStyle(
-                    color: Colors.black45,
-                    fontSize: 16,
-                  ),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'SENDER PHONE NUMBER',
-                  labelStyle: TextStyle(
-                    color: Colors.black45,
-                    fontSize: 16,
-                  ),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'PACKAGE STATUS',
-                  labelStyle: TextStyle(
-                    color: Colors.black45,
-                    fontSize: 16,
-                  ),
-                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -196,6 +158,55 @@ class _CheckmoreState extends State<Checkmore> {
     );
   }
 
+  Widget _buildInfoRow(String label, String? value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value ?? 'Not available',
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onBottomNavTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+      switch (selectedIndex) {
+        case 0:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const UserHomePage()),
+          );
+          break;
+        case 1:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Packagelist()),
+          );
+          break;
+        case 2:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const userProfile()),
+          );
+          break;
+      }
+    });
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -224,8 +235,9 @@ class _CheckmoreState extends State<Checkmore> {
       },
     );
   }
-  
-  checkstatus(BuildContext context) {
+
+  void checkstatus(BuildContext context) {
+    // Add status-checking logic here, if any.
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const Packagelist()),
