@@ -66,6 +66,22 @@ class _RegisterdriverState extends State<Registerdriver> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+               if (image != null)
+                ClipOval(
+                  child: Container(
+                    height: 100,
+                    width: 100, 
+                    color: Colors.grey[300],
+                    child: Image.file(
+                      File(image!.path),
+                      fit: BoxFit.cover,
+                      width: 150, 
+                      height: 150, 
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 20),
               FilledButton(
                   onPressed: () async {
                     log('start:');
