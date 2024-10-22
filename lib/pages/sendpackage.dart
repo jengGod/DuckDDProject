@@ -550,8 +550,6 @@ void _showErrorDialog(BuildContext context, String message) {
       's_location_lng':longSend,
       'pic_1':imageUrl,
       'pic_2':"",
-      'pic_1':imageUrl,
-      'pic_2':"",
       'name':packageNameCtl.text,
       'descrip':packageDescriptionCtl.text,
       'rider':"",
