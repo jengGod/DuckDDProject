@@ -26,7 +26,6 @@ TextEditingController licenseCtl = TextEditingController();
 bool _isButtonPressed = false;
 XFile? image; // สำหรับการจัดการรูปภาพที่เลือก
 String imageUrl = '';
-
 class _RegisterdriverState extends State<Registerdriver> {
   final ImagePicker picker = ImagePicker();
 
