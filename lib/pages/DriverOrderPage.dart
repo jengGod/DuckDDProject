@@ -1,10 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/DriverHomePage.dart';
+import 'package:duckddproject/pages/DriverMap.dart';
 import 'package:duckddproject/pages/DriverProfile.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverOrderPage extends StatefulWidget {
   final Map<String, dynamic> order;
+  
 
   const DriverOrderPage({super.key, required this.order});
 
@@ -14,17 +19,53 @@ class DriverOrderPage extends StatefulWidget {
 
 class _DriverOrderPageState extends State<DriverOrderPage> {
   int selectedIndex = 0;
+  double lati=0;
+  double long=0;
 
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+  String? plate_number;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+      plate_number = prefs.getString('plate_number');
+    });
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      DocumentSnapshot locationDoc = await firestore
+          .collection('Driver_location')
+          .doc(phonenumber)
+          .get();
+      lati = locationDoc['location_loti'];
+      long = locationDoc['location_long'];
+    } catch (e) {}
+  }
+  
   @override
   Widget build(BuildContext context) {
     // ดึงข้อมูล order จาก widget.order
-    Map<String, dynamic> order = widget.order;
+  Map<String, dynamic> order = widget.order;
 
+ 
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 1.0),
         child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
+          backgroundColor:
+              const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -40,11 +81,12 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
             ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: const Color.fromARGB(255, 110, 112, 110), // Selected item color
+          selectedItemColor:
+              const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
             if (index == 2) {
-              _showLogoutDialog(context);  // Handle logout
+              _showLogoutDialog(context); // Handle logout
             } else {
               setState(() {
                 selectedIndex = index;
@@ -56,7 +98,8 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const DriverProfile()),
+                    MaterialPageRoute(
+                        builder: (context) => const DriverProfile()),
                   );
                 }
               });
@@ -148,8 +191,8 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                               ),
                               const SizedBox(height: 8),
                               Container(
-                                width: 100,
-                                height: 100,
+                                width: 60,
+                                height: 60,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   color: Colors.grey[300],
@@ -166,19 +209,63 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  completeOrder();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Background color
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                ),
-                child: const Text(
-                  'Order complete',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 160, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
+                    child: ElevatedButton(
+                      onPressed: () {
+                        completeOrder();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green, // Background color
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16), // แค่ padding แนวตั้ง
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        'Order complete',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16), // เว้นระยะห่างระหว่างปุ่มทั้งสอง
+                  SizedBox(
+                    width: 160, // ขนาดเท่ากันกับปุ่มแรก
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Drivermap(order:order),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16), // แค่ padding แนวตั้ง
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        'View map',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
@@ -202,7 +289,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
@@ -214,8 +301,73 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
       },
     );
   }
-  
+
   void completeOrder() {
     //delete order
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure?'),
+          content: const Text('Do you want to complete this order?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DriverPage()),
+                );
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
   }
+
+  Future<Position> realTimePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
+
+  
 }
