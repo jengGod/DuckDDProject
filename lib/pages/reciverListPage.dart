@@ -107,6 +107,7 @@ class _ReciverlistState extends State<Reciverlistpage> {
                       children: [
                         Text(user['phonenumber'] ?? 'phonenumber'), // Display user's phone number
                         Text(user['email'] ?? 'email'), // Display user's email
+                        Text(user['address'] ?? 'address'),
                       ],
                     ),
                     onTap: () {
@@ -114,6 +115,7 @@ class _ReciverlistState extends State<Reciverlistpage> {
                       Navigator.pop(context, {
                         'username': user['username'],
                         'phonenumber': user['phonenumber'],
+                        'address': user['address'],
                       });
                     },
                   );

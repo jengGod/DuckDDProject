@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/DriverOrderPage.dart';
 import 'package:duckddproject/pages/DriverProfile.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverPage extends StatefulWidget {
   const DriverPage({super.key});
@@ -13,6 +16,29 @@ class DriverPage extends StatefulWidget {
 
 class _DriverPageState extends State<DriverPage> {
   int selectedIndex = 0;
+
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+  String? plate_number;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+      plate_number = prefs.getString('plate_number');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +171,7 @@ class _DriverPageState extends State<DriverPage> {
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
                                     child: Text(
-                                      'destination: ${(order['r_location_lat'] ?? 'Unknown')}, Lng: ${(order['r_location_lng'] ?? 'Unknown')}',
+                                      'destination: ${(order['r_address'] ?? 'Unknown')}',
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Color.fromARGB(255, 3, 3, 3),
@@ -207,7 +233,9 @@ class _DriverPageState extends State<DriverPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async{
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -222,10 +250,22 @@ class _DriverPageState extends State<DriverPage> {
   }
 
   void acceptOrder(BuildContext context, Map<String, dynamic> order) {
+    log(order['sender']);
+    log(order['receiver']);
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    var db = FirebaseFirestore.instance;
 
+    var data = {
+      'order_status':'2',
+      'plate_number':plate_number.toString(),
+      'rider':phonenumber.toString(),
+    };
+    log('plate num:'+plate_number.toString());
+    log('phone num:'+phonenumber.toString());
+    
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const DriverOrderPage(order: {},)),
+      MaterialPageRoute(builder: (context) => DriverOrderPage(order: order)),
     );
   }
 }

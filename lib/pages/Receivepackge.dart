@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/checkrecivemore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'LoginPage.dart';
 import 'UserHome.dart';
 import 'packagelist.dart';
@@ -14,6 +16,23 @@ class Receciveuser extends StatefulWidget {
 
 class _RececiveuserState extends State<Receciveuser> {
   int selectedIndex = 0;
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+
+
+
+
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+    });
+  }
 
   // Dummy package data
   final List<Map<String, String>> packages = [
@@ -21,6 +40,11 @@ class _RececiveuserState extends State<Receciveuser> {
     {"name": "PACKAGE NAME", "description": "description"},
     {"name": "PACKAGE NAME", "description": "description"},
   ];
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +55,8 @@ class _RececiveuserState extends State<Receciveuser> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 0.0),
         child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
+          backgroundColor:
+              const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -51,7 +76,8 @@ class _RececiveuserState extends State<Receciveuser> {
             ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: const Color.fromARGB(255, 110, 112, 110), // Selected item color
+          selectedItemColor:
+              const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
             if (index == 3) {
@@ -62,17 +88,20 @@ class _RececiveuserState extends State<Receciveuser> {
                 if (selectedIndex == 0) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const UserHomePage()),
+                    MaterialPageRoute(
+                        builder: (context) => const UserHomePage()),
                   );
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const Packagelist()),
+                    MaterialPageRoute(
+                        builder: (context) => const Packagelist()),
                   );
                 } else if (selectedIndex == 2) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const userProfile()),
+                    MaterialPageRoute(
+                        builder: (context) => const userProfile()),
                   );
                 }
               });
@@ -81,88 +110,102 @@ class _RececiveuserState extends State<Receciveuser> {
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: packages.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Card(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                elevation: 4,
-                child: Row(
-                  children: [
-                    Padding(
-                        padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        color: const Color.fromARGB(255, 252, 227, 3), 
-                        width: 120,
-                        height: 120,
-                        child: const Icon(Icons.image, size: 50), 
-                      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('Orders').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Filter orders based on the receiver's phone number
+          final List<Map<String, dynamic>> filteredList = snapshot.data!.docs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .where((order) =>
+                  order['receiver'] ==
+                  phonenumber) // Match the receiver with the user's phone number
+              .toList();
+
+          if (filteredList.isEmpty) {
+            return const Center(child: Text('No orders found.'));
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView.builder(
+              itemCount: filteredList.length,
+              itemBuilder: (context, index) {
+                Map<String, dynamic> order = filteredList[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Card(
+                    color: const Color.fromARGB(255, 221, 216, 216),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
                     ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Card(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                packages[index]['name']!,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                packages[index]['description']!,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        More(context);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.black,
-                                      ),
-                                      child: const Text(
-                                        'more',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
+                    elevation: 4,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.network(
+                            order['pic_1'] ?? '',
+                            width: 120,
+                            height: 120,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('PackageName: ${order['name'] ?? 'Unknown'}',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    )),
+                                Text(
+                                    'Description: ${order['descrip'] ?? 'Unknown'}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color.fromARGB(255, 3, 3, 3),
+                                    )),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      More(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black,
+                                    ),
+                                    child: const Text(
+                                      'More',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
+
     );
   }
 

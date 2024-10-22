@@ -361,10 +361,7 @@ class _RegisteruserState extends State<Registeruser> {
   
   db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
     // Navigate to LoginPage and refresh
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
+    Navigator.pop(context);
   }).catchError((error) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error: $error')),

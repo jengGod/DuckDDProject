@@ -20,12 +20,18 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
-
+   
 class _LoginPageState extends State<LoginPage> {
   TextEditingController phoneCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
   bool isLoggingIn = false;
   late final String password;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext contxte) {
     return Scaffold(
@@ -245,6 +251,7 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('email', userData['email']);
           await prefs.setString('phonenumber', userData['phonenumber']);
           await prefs.setString('profile_picture', userData['profile_picture']);
+          await prefs.setString('address', userData['address']);
           await prefs.setString('password', passCtl.text); 
           log('Login successful!');
          
@@ -266,6 +273,7 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('email', driverData['email']);
           await prefs.setString('phonenumber', driverData['phonenumber']);
           await prefs.setString('profile_picture', driverData['profile_picture']);
+          await prefs.setString('plate_number', driverData['license']);
           log('Login successful!');
           
           Navigator.pushReplacement(
@@ -293,14 +301,14 @@ class _LoginPageState extends State<LoginPage> {
 void register(BuildContext context) {
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => Registeruser()),
+    MaterialPageRoute(builder: (context) => const Registeruser()),
   );
 }
 
 void registerDriver(BuildContext context) {
-  Navigator.push(
+  Navigator.pushReplacement(
     context,
-    MaterialPageRoute(builder: (context) => Registerdriver()),
+    MaterialPageRoute(builder: (context) => const Registerdriver()),
   );
 }
 

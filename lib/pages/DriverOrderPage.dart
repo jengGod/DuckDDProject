@@ -81,7 +81,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                         // แสดงรูปภาพจาก order['pic_1']
                         Container(
                           width: double.infinity,
-                          height: 120,
+                          height: 180,
                           color: Colors.yellow,
                           child: order['pic_1'] != null
                               ? Image.network(order['pic_1'], fit: BoxFit.cover)
@@ -97,19 +97,21 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                         const SizedBox(height: 16),
                         // แสดงข้อมูล sender และ receiver จาก order
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             // Sender details
                             Flexible(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text('Location',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  Text('Sender: ${order['sender'] ?? 'Unknown'}',
+                                  Text('Sender name'),
+                                  Text('${order['s_name'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
-                                  Text('Phone: ${order['sender_phone'] ?? 'Unknown'}',
+                                  Text('Sender phonenumber'),
+                                  Text('${order['sender'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
+                                  Text('Sender address'),
+                                  Text('${order['s_address'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
                                 ],
                               ),
@@ -117,45 +119,23 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                             // Receiver details
                             Flexible(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text('Destination',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  Text('Receiver: ${order['receiver'] ?? 'Unknown'}',
+                                  Text('Receiver name'),
+                                  Text('${order['r_name'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
-                                  Text('Phone: ${order['receiver_phone'] ?? 'Unknown'}',
+                                  Text('Receiver phonenumber'),
+                                  Text('${order['receiver'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
+                                  Text('Receiver address'),
+                                  Text('${order['r_address'] ?? 'Unknown'}',
                                       overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        // Delivering camera button
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
-                              const Text(
-                                'DELIVERING',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.grey[300],
-                                ),
-                                child: const Icon(Icons.camera_alt, size: 50),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 5),
                         // Delivered camera button
                         Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -188,7 +168,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Handle order completion logic here
+                  completeOrder();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Background color
@@ -233,5 +213,9 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
         );
       },
     );
+  }
+  
+  void completeOrder() {
+    //delete order
   }
 }

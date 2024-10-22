@@ -30,6 +30,7 @@ class _SendPageState extends State<SendPage> {
 
   String? selectedUsername;
   String? selectedPhoneNumber;
+  String? selectedAddress;
 
   LatLng? latLng;
   LatLng? latLngSend;
@@ -40,17 +41,17 @@ class _SendPageState extends State<SendPage> {
   String? email;
   String? phonenumber;
   String? profilePicture;
+  String? address;
 
   double lati = 0;
   double long = 0;
   double latiSend = 0;
   double longSend = 0;
 
-  
   XFile? image;
   final ImagePicker picker = ImagePicker();
   String imageUrl = '';
-  
+
   Future<void> openReciverList() async {
     final result = await Navigator.push(
       context,
@@ -60,6 +61,7 @@ class _SendPageState extends State<SendPage> {
       setState(() {
         selectedUsername = result['username'];
         selectedPhoneNumber = result['phonenumber'];
+        selectedAddress = result['address'];
         loadLocation();
       });
     }
@@ -78,6 +80,7 @@ class _SendPageState extends State<SendPage> {
       email = prefs.getString('email');
       phonenumber = prefs.getString('phonenumber');
       profilePicture = prefs.getString('profile_picture');
+      address = prefs.getString('address');
     });
   }
 
@@ -149,9 +152,9 @@ class _SendPageState extends State<SendPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-             Container(
-  height: 150,
-  width: double.infinity,
+              Container(
+                height: 150,
+                width: double.infinity,
                 color: Colors.grey[300],
                 child: image != null
                     ? Expanded(
@@ -302,10 +305,13 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (selectedUsername != null && selectedPhoneNumber != null) ...[
+              if (selectedUsername != null &&
+                  selectedPhoneNumber != null &&
+                  selectedAddress != null) ...[
                 //--------------------------*map here
                 Text('Receiver name: $selectedUsername'),
                 Text('Receiver phonenumber: $selectedPhoneNumber'),
+                Text('Receiver address: $selectedAddress'),
                 const SizedBox(height: 16),
                 showMap(),
               ],
@@ -355,7 +361,9 @@ class _SendPageState extends State<SendPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -401,105 +409,115 @@ class _SendPageState extends State<SendPage> {
       },
     );
   }
-  
-  
-void Confirm(BuildContext context) {
-  if (selectedUsername == null || selectedPhoneNumber == null) {
-  _showErrorDialog(context, 'Please Choose Receiver');
-  return; // Stop the confirmation process if no receiver is selected
-}
 
-  // ตรวจสอบว่าชื่อพัสดุ (packageName) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
-  if (packageNameCtl.text.isEmpty) {
-    _showErrorDialog(context, 'Package name cannot be empty.');
-    return; // หยุดการทำงานหากไม่มีการกรอกชื่อพัสดุ
-  }
+  void Confirm(BuildContext context) {
+    if (selectedUsername == null ||
+        selectedPhoneNumber == null ||
+        selectedAddress == null) {
+      _showErrorDialog(context, 'Please Choose Receiver');
+      return; // Stop the confirmation process if no receiver is selected
+    }
 
-  // ตรวจสอบว่ารายละเอียดพัสดุ (packageDescription) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
-  if (packageDescriptionCtl.text.isEmpty) {
-    _showErrorDialog(context, 'Package description cannot be empty.');
-    return; // หยุดการทำงานหากไม่มีการกรอกรายละเอียดพัสดุ
-  }
+    // ตรวจสอบว่าชื่อพัสดุ (packageName) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
+    if (packageNameCtl.text.isEmpty) {
+      _showErrorDialog(context, 'Package name cannot be empty.');
+      return; // หยุดการทำงานหากไม่มีการกรอกชื่อพัสดุ
+    }
 
-  // ตรวจสอบว่ามีการเลือกรูปภาพแล้วหรือยัง หากไม่มีจะแสดงหน้าต่างแจ้งเตือน
-  if (image == null) {
-    _showErrorDialog(context, 'Please upload an image.');
-    return; // หยุดการทำงานหากไม่มีรูปภาพที่อัปโหลด
-  }
+    // ตรวจสอบว่ารายละเอียดพัสดุ (packageDescription) ไม่เป็นค่าว่าง หากว่างจะแสดงหน้าต่างแจ้งเตือน
+    if (packageDescriptionCtl.text.isEmpty) {
+      _showErrorDialog(context, 'Package description cannot be empty.');
+      return; // หยุดการทำงานหากไม่มีการกรอกรายละเอียดพัสดุ
+    }
 
-  // หากข้อมูลครบถ้วน เรียกฟังก์ชัน addOrder เพื่อบันทึกคำสั่งซื้อ
-  addOrder();
-  
-  // แสดงหน้าต่างยืนยันคำสั่งซื้อเสร็จสิ้น
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // กำหนดขนาดของคอลัมน์ให้พอดีกับเนื้อหา
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end, // จัดให้ปุ่มปิดอยู่ทางด้านขวา
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const UserHomePage()),
-                      ); // ปิดหน้าต่างเมื่อกดปุ่มปิด
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10), // เว้นระยะห่างแนวตั้ง 10 พิกเซล
-              const Padding(
-                padding: EdgeInsets.only(bottom: 20.0), // เพิ่มระยะห่างด้านล่าง 20 พิกเซล
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // จัดตำแหน่งข้อความให้อยู่กึ่งกลาง
+    // ตรวจสอบว่ามีการเลือกรูปภาพแล้วหรือยัง หากไม่มีจะแสดงหน้าต่างแจ้งเตือน
+    if (image == null) {
+      _showErrorDialog(context, 'Please upload an image.');
+      return; // หยุดการทำงานหากไม่มีรูปภาพที่อัปโหลด
+    }
+
+    // หากข้อมูลครบถ้วน เรียกฟังก์ชัน addOrder เพื่อบันทึกคำสั่งซื้อ
+    addOrder();
+
+    // แสดงหน้าต่างยืนยันคำสั่งซื้อเสร็จสิ้น
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize:
+                  MainAxisSize.min, // กำหนดขนาดของคอลัมน์ให้พอดีกับเนื้อหา
+              children: [
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.end, // จัดให้ปุ่มปิดอยู่ทางด้านขวา
                   children: [
-                    Text('COMPLETE SEND ORDER!!!'), // แสดงข้อความ "COMPLETE SEND ORDER!!!"
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const UserHomePage()),
+                        ); // ปิดหน้าต่างเมื่อกดปุ่มปิด
+                      },
+                    ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 10), // เว้นระยะห่างแนวตั้ง 10 พิกเซล
+                const Padding(
+                  padding: EdgeInsets.only(
+                      bottom: 20.0), // เพิ่มระยะห่างด้านล่าง 20 พิกเซล
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .center, // จัดตำแหน่งข้อความให้อยู่กึ่งกลาง
+                    children: [
+                      Text(
+                          'COMPLETE SEND ORDER!!!'), // แสดงข้อความ "COMPLETE SEND ORDER!!!"
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-  
-}
+        );
+      },
+    );
+  }
 
 // ฟังก์ชัน _showErrorDialog ใช้แสดงหน้าต่างแจ้งเตือนเมื่อข้อมูลไม่ครบ
-void _showErrorDialog(BuildContext context, String message) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('ไม่สามารถส่งข้อมูลได้'), // หัวข้อของหน้าต่างเป็น "Error"
-        content: Text(message), // เนื้อหาเป็นข้อความที่ถูกส่งมาผ่านพารามิเตอร์
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // ปิดหน้าต่างเมื่อกดปุ่ม OK
-            },
-            child: const Text('OK'), // ปุ่ม OK ที่ผู้ใช้สามารถกดเพื่อปิดหน้าต่าง
-          ),
-        ],
-      );
-    },
-  );
-}
-
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+              'ไม่สามารถส่งข้อมูลได้'), // หัวข้อของหน้าต่างเป็น "Error"
+          content:
+              Text(message), // เนื้อหาเป็นข้อความที่ถูกส่งมาผ่านพารามิเตอร์
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // ปิดหน้าต่างเมื่อกดปุ่ม OK
+              },
+              child:
+                  const Text('OK'), // ปุ่ม OK ที่ผู้ใช้สามารถกดเพื่อปิดหน้าต่าง
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> loadLocation() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     try {
       log(selectedPhoneNumber.toString());
-      DocumentSnapshot locationDoc =
-          await firestore.collection('Users_location').doc(selectedPhoneNumber).get();
+      DocumentSnapshot locationDoc = await firestore
+          .collection('Users_location')
+          .doc(selectedPhoneNumber)
+          .get();
       DocumentSnapshot locationSenderDoc =
           await firestore.collection('Users_location').doc(phonenumber).get();
       if (locationDoc.exists && locationSenderDoc.exists) {
@@ -559,8 +577,8 @@ void _showErrorDialog(BuildContext context, String message) {
                 ),
               ],
             ),
-          if(latLngSend != null)
-          MarkerLayer(
+          if (latLngSend != null)
+            MarkerLayer(
               markers: [
                 Marker(
                   point: latLngSend!,
@@ -580,45 +598,51 @@ void _showErrorDialog(BuildContext context, String message) {
   }
 
   Future<void> addOrder() async {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  var db = FirebaseFirestore.instance;
-  DocumentReference counterRef = firestore.collection('Counters').doc('order_counter');
-  // Run a transaction to prevent race conditions
-  firestore.runTransaction((transaction) async {
-    // Get the current running number
-    DocumentSnapshot snapshot = await transaction.get(counterRef);
-    if (!snapshot.exists) {
-      throw Exception("Counter document does not exist!");
-    }
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    var db = FirebaseFirestore.instance;
+    DocumentReference counterRef =
+        firestore.collection('Counters').doc('order_counter');
+    // Run a transaction to prevent race conditions
+    firestore.runTransaction((transaction) async {
+      // Get the current running number
+      DocumentSnapshot snapshot = await transaction.get(counterRef);
+      if (!snapshot.exists) {
+        throw Exception("Counter document does not exist!");
+      }
 
-    int currentNumber = snapshot.get('running_number');
+      int currentNumber = snapshot.get('running_number');
 
-    // Increment the running number and update the counter document
-    int newNumber = currentNumber + 1;
-    transaction.update(counterRef, {'running_number': newNumber});
-  }).catchError((error) {
-    print("Failed to add order: $error");
-  });
+      // Increment the running number and update the counter document
+      int newNumber = currentNumber + 1;
+      transaction.update(counterRef, {'running_number': newNumber});
+    }).catchError((error) {
+      print("Failed to add order: $error");
+    });
 
-   var data = {
+    var data = {
       'sender': phonenumber.toString(),
-      'receiver':selectedPhoneNumber.toString(),
-      'r_location_lat':lati, 
-      'r_location_lng':long,
-      's_location_lat':latiSend, 
-      's_location_lng':longSend,
-      'pic_1':imageUrl,
-      'pic_2':"",
-      'name':packageNameCtl.text,
-      'descrip':packageDescriptionCtl.text,
-      'rider':"",
-      'plate_number':"",
-      'order_status':"1"
+      'receiver': selectedPhoneNumber.toString(),
+      'r_location_lat': lati,
+      'r_location_lng': long,
+      's_location_lat': latiSend,
+      's_location_lng': longSend,
+      'pic_1': imageUrl,
+      'pic_2': "",
+      'name': packageNameCtl.text,
+      'descrip': packageDescriptionCtl.text,
+      'rider': "",
+      'plate_number': "",
+      'order_status': "1",
+      's_name': username.toString(),
+      'r_name': selectedUsername.toString(),
+      'r_address': selectedAddress.toString(),
+      's_address': address.toString()
     };
-
+    log(address.toString());
     try {
       log('Start Order');
-      DocumentSnapshot orderNum = await firestore.collection('Counters').doc('order_counter').get();
+      DocumentSnapshot orderNum =
+          await firestore.collection('Counters').doc('order_counter').get();
       String orderID = orderNum['running_number'].toString();
       db.collection('Orders').doc(orderID).set(data);
     } catch (e) {
@@ -626,7 +650,7 @@ void _showErrorDialog(BuildContext context, String message) {
       //รูป
       //ดักปุ่ม
     }
-}
+  }
 
   Future<String> uploadImage(XFile image) async {
     // สร้าง Reference สำหรับ Firebase Storage
@@ -642,5 +666,4 @@ void _showErrorDialog(BuildContext context, String message) {
     String downloadURL = await imageRef.getDownloadURL();
     return downloadURL;
   }
-
 }
