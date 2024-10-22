@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/ChangePassword.dart';
 import 'package:duckddproject/pages/Changelocation.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -41,6 +42,7 @@ class _userProfileState extends State<userProfile> {
   String? phonenumber;
   String? profilePicture;
   String? oldPassword;
+  String? address;
   bool _isButtonPressed = false;
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
@@ -49,6 +51,7 @@ class _userProfileState extends State<userProfile> {
   final TextEditingController _oldPasswordController = TextEditingController();
   TextEditingController newPasswordCtl = TextEditingController();
   TextEditingController PassCtl = TextEditingController();
+  TextEditingController addressCtl = TextEditingController();
   final TextEditingController phoneCtl = TextEditingController();
 
   // Visibility state for password fields
@@ -58,7 +61,9 @@ class _userProfileState extends State<userProfile> {
   bool _isFormComplete() {
     return _emailController.text.isNotEmpty &&
         _usernameController.text.isNotEmpty &&
-        _phonenumberController.text.isNotEmpty;
+        _phonenumberController.text.isNotEmpty&&
+        addressCtl.text.isEmpty
+        ;
   }
 
   XFile? image;
@@ -225,7 +230,16 @@ class _userProfileState extends State<userProfile> {
                 ),
               ),
               const SizedBox(height: 16),
-
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  controller:  addressCtl,
+                  decoration: const InputDecoration(
+                    labelText: 'Address',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),  
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -359,11 +373,12 @@ class _userProfileState extends State<userProfile> {
       email = prefs.getString('email');
       phonenumber = prefs.getString('phonenumber');
       profilePicture = prefs.getString('profile_picture');
-      oldPassword = prefs.getString('password'); // Load old password
+      oldPassword = prefs.getString('password');
+      address = prefs.getString('address'); // Load old password
 
       // Set the old password in the controller
       oldPassword = oldPassword ?? '';
-
+      addressCtl.text = address ??'';
       // Update the text field controllers with loaded data
       _emailController.text = email ?? '';
       _usernameController.text = username ?? '';
@@ -387,6 +402,7 @@ class _userProfileState extends State<userProfile> {
     await prefs.setString('email', _emailController.text);
     await prefs.setString('username', _usernameController.text);
     await prefs.setString('phonenumber', _phonenumberController.text);
+    await prefs.setString('address', addressCtl.text);
 
     // ตรวจสอบว่ามีการอัปโหลดรูปภาพใหม่หรือไม่
     if (image != null) {
@@ -429,7 +445,8 @@ class _userProfileState extends State<userProfile> {
       var data = {
         'username': _usernameController.text,
         'email': _emailController.text,
-        'phonenumber': _phonenumberController.text, 
+        'phonenumber': _phonenumberController.text,
+        'address':addressCtl.text, 
         'profile_picture': updatedImageUrl,
         'password': hashedPassword
       };
