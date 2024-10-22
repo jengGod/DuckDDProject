@@ -273,6 +273,7 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('email', driverData['email']);
           await prefs.setString('phonenumber', driverData['phonenumber']);
           await prefs.setString('profile_picture', driverData['profile_picture']);
+          await prefs.setString('plate_number', driverData['license']);
           log('Login successful!');
           
           Navigator.pushReplacement(
