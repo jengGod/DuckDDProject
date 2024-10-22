@@ -3,18 +3,23 @@ import 'package:duckddproject/pages/DriverProfile.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 
-class Driverorderpage extends StatefulWidget {
-  const Driverorderpage({super.key});
+class DriverOrderPage extends StatefulWidget {
+  final Map<String, dynamic> order;
+
+  const DriverOrderPage({super.key, required this.order});
 
   @override
-  State<Driverorderpage> createState() => _DriverorderpageState();
+  State<DriverOrderPage> createState() => _DriverOrderPageState();
 }
 
-class _DriverorderpageState extends State<Driverorderpage> {
+class _DriverOrderPageState extends State<DriverOrderPage> {
   int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    // ดึงข้อมูล order จาก widget.order
+    Map<String, dynamic> order = widget.order;
+
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 1.0),
@@ -73,39 +78,56 @@ class _DriverorderpageState extends State<Driverorderpage> {
                     color: const Color.fromARGB(255, 255, 255, 255),
                     child: Column(
                       children: [
+                        // แสดงรูปภาพจาก order['pic_1']
                         Container(
                           width: double.infinity,
                           height: 120,
                           color: Colors.yellow,
-                          child: const Center(
-                            child: Text(
-                              'PACKAGE IMAGE',
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                          child: order['pic_1'] != null
+                              ? Image.network(order['pic_1'], fit: BoxFit.cover)
+                              : const Center(
+                                  child: Text(
+                                    'PACKAGE IMAGE',
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                         ),
                         const SizedBox(height: 16),
-                        // Sender and receiver information
-                        const Row(
+                        // แสดงข้อมูล sender และ receiver จาก order
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // Sender details
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Location', style: TextStyle(fontWeight: FontWeight.bold)),
-                                Text('Sender Name'),
-                                Text('Sender PhoneNumber'),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Location',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  Text('Sender: ${order['sender'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
+                                  Text('Phone: ${order['sender_phone'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
+                                ],
+                              ),
                             ),
                             // Receiver details
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Destination', style: TextStyle(fontWeight: FontWeight.bold)),
-                                Text('Receiver Name'),
-                                Text('Receiver PhoneNumber'),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Destination',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  Text('Receiver: ${order['receiver'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
+                                  Text('Phone: ${order['receiver_phone'] ?? 'Unknown'}',
+                                      overflow: TextOverflow.ellipsis),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -117,7 +139,8 @@ class _DriverorderpageState extends State<Driverorderpage> {
                             children: [
                               const Text(
                                 'DELIVERING',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                               const SizedBox(height: 8),
                               Container(
@@ -140,7 +163,8 @@ class _DriverorderpageState extends State<Driverorderpage> {
                             children: [
                               const Text(
                                 'DELIVERED',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                               const SizedBox(height: 8),
                               Container(
@@ -162,10 +186,9 @@ class _DriverorderpageState extends State<Driverorderpage> {
                 ),
               ),
               const SizedBox(height: 20),
-              
               ElevatedButton(
                 onPressed: () {
-                 
+                  // Handle order completion logic here
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Background color
