@@ -46,12 +46,16 @@ class _DrivermapState extends State<Drivermap> {
     if (phonenumber == null) return;
 
     try {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       lati = position.latitude;
       long = position.longitude;
 
       // Update Firestore with the new location
-      await FirebaseFirestore.instance.collection('Driver_location').doc(phonenumber).set({
+      await FirebaseFirestore.instance
+          .collection('Driver_location')
+          .doc(phonenumber)
+          .set({
         'location_loti': lati,
         'location_long': long,
       });
@@ -99,12 +103,18 @@ class _DrivermapState extends State<Drivermap> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Center(child: showMap()),
-          ],
-        ),
+      body: Center(
+        child: latLng != null
+            ? showMap() // Show the map if latLng is available
+            : Column(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center vertically
+                children: [
+                  CircularProgressIndicator(), // Loading spinner
+                  SizedBox(height: 20), // Space between spinner and text
+                  Text('Loading location...'), // Informational text
+                ],
+              ),
       ),
     );
   }
