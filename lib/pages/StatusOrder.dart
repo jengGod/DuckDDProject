@@ -21,7 +21,7 @@ class Statusorder extends StatefulWidget {
 }
 
 class _StatusorderState extends State<Statusorder> {
- final MapController mapController = MapController(); // ควบคุมแผนที่
+  final MapController mapController = MapController(); // ควบคุมแผนที่
   bool isLoading = true;
   int selectedIndex = 1;
   String? username;
@@ -44,8 +44,8 @@ class _StatusorderState extends State<Statusorder> {
     driverLocation();
     startLocationUpdates();
   }
-  
-  Future<void> driverLocation() async{
+
+  Future<void> driverLocation() async {
     if (widget.order['rider'].toString == null) return;
     try {
       var documentSnapshot = await FirebaseFirestore.instance
@@ -53,14 +53,14 @@ class _StatusorderState extends State<Statusorder> {
           .doc(widget.order['rider'].toString())
           .get();
       var data = documentSnapshot.data();
-       if (data != null){
+      if (data != null) {
         setState(() {
           lati = data?['location_loti'];
           long = data?['location_long'];
           latLng = LatLng(lati, long);
-        log('Driver Location: lati: $lati, long: $long');
+          log('Driver Location: lati: $lati, long: $long');
         });
-       }else {
+      } else {
         log('No latitude or longitude found in Firestore document');
       }
       if (latLng != null) {
@@ -82,7 +82,8 @@ class _StatusorderState extends State<Statusorder> {
       });
     }
   }
-   @override
+
+  @override
   void dispose() {
     // Stop location updates when the widget is disposed
     stopLocationUpdates();
@@ -97,10 +98,11 @@ class _StatusorderState extends State<Statusorder> {
     }
     _isUpdatingLocation = false;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         title: const Text('เลือกตำแหน่งบนแผนที่'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -113,7 +115,7 @@ class _StatusorderState extends State<Statusorder> {
           },
         ),
       ),
-            bottomNavigationBar: Padding(
+      bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 0.0),
         child: BottomNavigationBar(
           backgroundColor:
@@ -171,145 +173,154 @@ class _StatusorderState extends State<Statusorder> {
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
-      body:Center(
+      body: Center(
         child: SingleChildScrollView(
           child: Column(
             children: [
               showMap(),
-              const SizedBox(height: 40,),
+              const SizedBox(
+                height: 40,
+              ),
               Card(
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(15.0), // Rounded corners
-  ),
-  elevation: 5,
-  margin: const EdgeInsets.all(10),
-  child: Padding(
-    padding: const EdgeInsets.all(15.0),
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Align content to center
-        children: [
-          // Row for the status options
-           const SingleChildScrollView(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Text(
-                  'SEARCH OF DRIVER',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0), // Rounded corners
+                ),
+                elevation: 5,
+                margin: const EdgeInsets.all(10),
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.center, // Align content to center
+                      children: [
+                        // Row for the status options
+                        const SingleChildScrollView(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text(
+                                'SEARCH OF DRIVER',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 8,
+                                ),
+                              ),
+                              Text(
+                                'PICKUP PACKAGE',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 8,
+                                ),
+                              ),
+                              Text(
+                                'DELIVERING',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 8,
+                                ),
+                              ),
+                              Text(
+                                'DELIVERED',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Progress indicator
+                        // const Padding(
+                        //   padding: EdgeInsets.symmetric(vertical: 10),
+                        //   child: LinearProgressIndicator(
+                        //     value: 0.75, // Adjust this value based on the current status
+                        //     backgroundColor: Colors.grey,
+                        //     valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
+                        //   ),
+                        // ),
+                        // Row with driver details
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Image.asset(
+                                  'assets/image/duck.png',
+                                  width: 20,
+                                  height: 20,
+                                ),
+                                const Text(
+                                  'DRIVER',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                                const Text(
+                                  'Mark', // Replace with dynamic driver name
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            const Column(
+                              children: [
+                                Text(
+                                  'LICENSE',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                                Text(
+                                  'abc123', // Replace with dynamic license
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            const Column(
+                              children: [
+                                Text(
+                                  'PHONE NUMBER',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                                Text(
+                                  '08123456789', // Replace with dynamic phone number
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Button for checking package picture
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Action to view package picture
+                            },
+                            icon: const Icon(Icons.camera_alt),
+                            label: const Text('CHECK PACKAGE PICTURE'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey, // Button color
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Text(
-                  'PICKUP PACKAGE',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 8,
-                  ),
-                ),
-                Text(
-                  'DELIVERING',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 8,
-                  ),
-                ),
-                Text(
-                  'DELIVERED',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Progress indicator
-          // const Padding(
-          //   padding: EdgeInsets.symmetric(vertical: 10),
-          //   child: LinearProgressIndicator(
-          //     value: 0.75, // Adjust this value based on the current status
-          //     backgroundColor: Colors.grey,
-          //     valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
-          //   ),
-          // ),
-          // Row with driver details
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Image.asset(
-                    'assets/image/duck.png', 
-                    width: 20,
-                    height: 20,
-                  ),
-                  const Text(
-                    'DRIVER',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
-                  const Text(
-                    'Mark', // Replace with dynamic driver name
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-              const Column(
-                children: [
-                  Text(
-                    'LICENSE',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
-                  Text(
-                    'abc123', // Replace with dynamic license
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-              const Column(
-                children: [
-                  Text(
-                    'PHONE NUMBER',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
-                  Text(
-                    '08123456789', // Replace with dynamic phone number
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          // Button for checking package picture
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // Action to view package picture
-              },
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('CHECK PACKAGE PICTURE'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey, // Button color
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  ),
-)
-
+              )
             ],
           ),
         ),
-      ) ,
+      ),
     );
   }
+
   @override
-Widget showMap() {
-  latLngSend = LatLng(
+  Widget showMap() {
+    latLngSend = LatLng(
       widget.order['s_location_lat'],
       widget.order['s_location_lng'],
     );
@@ -317,7 +328,7 @@ Widget showMap() {
       widget.order['r_location_lat'],
       widget.order['r_location_lng'],
     );
-  return SizedBox(
+    return SizedBox(
       width: 400,
       height: 800,
       child: FlutterMap(
@@ -375,7 +386,7 @@ Widget showMap() {
         ],
       ),
     );
-}
+  }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
