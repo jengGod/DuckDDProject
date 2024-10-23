@@ -8,6 +8,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//เปลี่ยนจาก update ทุกช่วงเวลาวินาทีเป็นวิธีอื่น หรือ ปรับจาก 10 วิเป็น ไวกว่านี้
+//ถ้าใช้ licener จับ event
+
+//เพิ่มปุ่มหยุดการจับตำแหน่งด้วย (ปุ่ม complete order)
+
 class Drivermap extends StatefulWidget {
   final Map<String, dynamic> order;
   const Drivermap({
@@ -68,7 +73,7 @@ class _DrivermapState extends State<Drivermap> {
 
       // Only move the map if latLng is not null
       if (latLng != null) {
-        mapController.move(latLng!, 15.0);
+        mapController.move(latLng!, 17.0);
       }
     } catch (e) {
       log('Error updating location: $e');
@@ -76,7 +81,7 @@ class _DrivermapState extends State<Drivermap> {
   }
 
   void startLocationUpdates() {
-    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+    locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       await updateDriverLocation();
     });
   }
