@@ -281,62 +281,64 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 160, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
-                    child: ElevatedButton(
-                      onPressed: () {
-                        completeOrder();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green, // Background color
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16), // แค่ padding แนวตั้ง
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      child: const Text(
-                        'Order complete',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16), // เว้นระยะห่างระหว่างปุ่มทั้งสอง
-                  SizedBox(
-                    width: 160, // ขนาดเท่ากันกับปุ่มแรก
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Drivermap(order: order),
+              SingleChildScrollView(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: 130, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
+                      child: ElevatedButton(
+                        onPressed: () {
+                          completeOrder();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green, // Background color
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16), // แค่ padding แนวตั้ง
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16), // แค่ padding แนวตั้ง
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
                         ),
-                      ),
-                      child: const Text(
-                        'View map',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                        child: const Text(
+                          'Order complete',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 16), // เว้นระยะห่างระหว่างปุ่มทั้งสอง
+                    SizedBox(
+                      width: 130, // ขนาดเท่ากันกับปุ่มแรก
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Drivermap(order: order),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16), // แค่ padding แนวตั้ง
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: const Text(
+                          'View map',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               )
             ],
           ),
