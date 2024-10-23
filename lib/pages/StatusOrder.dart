@@ -21,12 +21,13 @@ class Statusorder extends StatefulWidget {
 }
 
 class _StatusorderState extends State<Statusorder> {
+  
   final MapController mapController = MapController(); // ควบคุมแผนที่
   bool isLoading = true;
   int selectedIndex = 1;
   String? username;
-  String? email;
-  String? phonenumber;
+  String? profilePicture;
+
 
   LatLng? latLng;
   LatLng? latLngSend;
@@ -41,8 +42,20 @@ class _StatusorderState extends State<Statusorder> {
   @override
   void initState() {
     super.initState();
+    loadUserData();
     driverLocation();
     startLocationUpdates();
+  }
+  
+  Future<void> loadUserData() async {
+    if(widget.order['rider'].toString() == null) return; //-----------------
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      DocumentSnapshot locationDoc =
+          await firestore.collection('Drivers').doc(widget.order['rider'].toString()).get();
+       username = locationDoc['username'];
+       profilePicture= locationDoc['profile_picture'];
+    } catch (e) {}
   }
 
   Future<void> driverLocation() async {
@@ -101,6 +114,7 @@ class _StatusorderState extends State<Statusorder> {
 
   @override
   Widget build(BuildContext context) {
+     
     return Scaffold(
       appBar: AppBar(
         title: const Text('เลือกตำแหน่งบนแผนที่'),
@@ -230,6 +244,16 @@ class _StatusorderState extends State<Statusorder> {
                             ],
                           ),
                         ),
+                        Row(
+                          children: [
+                            Image.asset(
+                                  'assets/image/duck.png',
+                                  width: 20,
+                                  height: 20,
+                                ),
+                          ],
+                        ),
+                        const SizedBox(height: 20,),
                         // Progress indicator
                         // const Padding(
                         //   padding: EdgeInsets.symmetric(vertical: 10),
@@ -240,53 +264,62 @@ class _StatusorderState extends State<Statusorder> {
                         //   ),
                         // ),
                         // Row with driver details
-                        Row(
+                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Column(
                               children: [
-                                Image.asset(
-                                  'assets/image/duck.png',
-                                  width: 20,
-                                  height: 20,
-                                ),
+                                ClipOval(
+                                  child: Image.network(
+                                    profilePicture
+                                        .toString(), // Convert to string in case it's null
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit
+                                        .cover, // Ensures the image fills the circular area
+                                  ),
+                                )
+                              ],
+                            ),
+                            Column(
+                              children: [
                                 const Text(
                                   'DRIVER',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12),
                                 ),
-                                const Text(
-                                  'Mark', // Replace with dynamic driver name
+                                Text(
+                                  username.toString(), // Replace with dynamic license
                                   style: TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
-                            const Column(
+                             Column(
                               children: [
-                                Text(
+                                const Text(
                                   'LICENSE',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12),
                                 ),
                                 Text(
-                                  'abc123', // Replace with dynamic license
-                                  style: TextStyle(fontSize: 12),
+                                  '${widget.order['plate_number'] ?? 'Unknown'}', // Replace with dynamic license
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
-                            const Column(
+                             Column(
                               children: [
-                                Text(
+                                const Text(
                                   'PHONE NUMBER',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12),
                                 ),
                                 Text(
-                                  '08123456789', // Replace with dynamic phone number
-                                  style: TextStyle(fontSize: 12),
+                                  '${widget.order['rider'] ?? 'Unknown'}', // Replace with dynamic phone number
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
@@ -330,7 +363,7 @@ class _StatusorderState extends State<Statusorder> {
     );
     return SizedBox(
       width: 400,
-      height: 800,
+      height: 300,
       child: FlutterMap(
         mapController: mapController,
         options: MapOptions(
