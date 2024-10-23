@@ -46,42 +46,68 @@ class _StatusorderState extends State<Statusorder> {
   }
 
   Future<void> loadUserData() async {
-    log('rider:' + widget.order['rider'].toString());
-    if (widget.order['rider'].toString() == null) {
+    if (widget.order['rider'] == null ||
+        widget.order['rider'].toString().isEmpty) {
+      // Assign default values when there is no rider
+      username = "รอพนักงานรับงาน";
+      profilePicture = null; // Or provide a default image path if you have one
       return;
-    } else {
-      
-      //-----------------
-      final FirebaseFirestore firestore = FirebaseFirestore.instance;
-      try {
-        DocumentSnapshot locationDoc = await firestore
-            .collection('Drivers')
-            .doc(widget.order['rider'].toString())
-            .get();
+    }
+
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      DocumentSnapshot locationDoc = await firestore
+          .collection('Drivers')
+          .doc(widget.order['rider'].toString())
+          .get();
+
+      if (locationDoc.exists) {
         username = locationDoc['username'];
         profilePicture = locationDoc['profile_picture'];
-      } catch (e) {}
+      } else {
+        // If the document doesn't exist, assign default values
+        username = "รอพนักงานรับงาน";
+        profilePicture = null;
+      }
+    } catch (e) {
+      // Handle errors by setting default values
+      username = "รอพนักงานรับงาน";
+      profilePicture = null;
     }
   }
 
   Future<void> driverLocation() async {
-    if (widget.order['rider'].toString == null) return;
+    if (widget.order['rider'] == null ||
+        widget.order['rider'].toString().isEmpty) {
+      log('No rider assigned. Waiting for a driver to accept the order.');
+      return;
+    }
+
     try {
       var documentSnapshot = await FirebaseFirestore.instance
           .collection('Driver_location')
           .doc(widget.order['rider'].toString())
           .get();
       var data = documentSnapshot.data();
+
       if (data != null) {
         setState(() {
-          lati = data?['location_loti'];
-          long = data?['location_long'];
+          lati = data?['location_loti'] ??
+              0.0; // Provide default values if necessary
+          long = data?['location_long'] ?? 0.0;
           latLng = LatLng(lati, long);
           log('Driver Location: lati: $lati, long: $long');
         });
       } else {
         log('No latitude or longitude found in Firestore document');
+        // Optionally provide a default location if no data is found
+        setState(() {
+          lati = 0.0; // Default latitude
+          long = 0.0; // Default longitude
+          latLng = LatLng(lati, long);
+        });
       }
+
       if (latLng != null) {
         mapController.move(latLng!, 18.0);
       }
@@ -91,12 +117,19 @@ class _StatusorderState extends State<Statusorder> {
   }
 
   void startLocationUpdates() {
+    // Check if rider exists before starting location updates
+    if (widget.order['rider'] == null ||
+        widget.order['rider'].toString().isEmpty) {
+      log('No rider assigned. Real-time location updates are not needed.');
+      return; // Don't start location updates if no rider is assigned
+    }
+
     // Start updating only if not already updating
     if (widget.order['rider'].toString == null) return;
     if (!_isUpdatingLocation) {
       _isUpdatingLocation = true;
 
-      // Start a Timer that updates the location every 5 seconds (for example)
+      // Start a Timer that updates the location every 3 seconds
       locationTimer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
         driverLocation();
       });
@@ -105,18 +138,15 @@ class _StatusorderState extends State<Statusorder> {
 
   @override
   void dispose() {
-    // Stop location updates when the widget is disposed
-    stopLocationUpdates();
+    stopLocationUpdates(); // Ensure location updates stop
     super.dispose();
   }
 
   void stopLocationUpdates() {
-    // Cancel the Timer to stop location updates
-    if (locationTimer != null) {
-      locationTimer!.cancel();
-      locationTimer = null;
+    if (_isUpdatingLocation && locationTimer != null) {
+      locationTimer?.cancel(); // Stop the periodic timer
+      _isUpdatingLocation = false; // Reset the flag
     }
-    _isUpdatingLocation = false;
   }
 
   @override
@@ -262,78 +292,120 @@ class _StatusorderState extends State<Statusorder> {
                         const SizedBox(
                           height: 20,
                         ),
-                        // Progress indicator
-                        // const Padding(
-                        //   padding: EdgeInsets.symmetric(vertical: 10),
-                        //   child: LinearProgressIndicator(
-                        //     value: 0.75, // Adjust this value based on the current status
-                        //     backgroundColor: Colors.grey,
-                        //     valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
-                        //   ),
-                        // ),
-                        // Row with driver details
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Column(
-                              children: [
-                                ClipOval(
-                                  child: Image.network(
-                                    profilePicture
-                                        .toString(), // Convert to string in case it's null
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit
-                                        .cover, // Ensures the image fills the circular area
+                        if (widget.order['rider'] == null ||
+                            widget.order['rider'].toString().isEmpty) ...[
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  Text(
+                                    'DRIVER',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
                                   ),
-                                )
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                const Text(
-                                  'DRIVER',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                                Text(
-                                  username
-                                      .toString(), // Replace with dynamic license
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                const Text(
-                                  'LICENSE',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                                Text(
-                                  '${widget.order['plate_number'] ?? 'Unknown'}', // Replace with dynamic license
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                const Text(
-                                  'PHONE NUMBER',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                                Text(
-                                  '${widget.order['rider'] ?? 'Unknown'}', // Replace with dynamic phone number
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                                  Text(
+                                    'รอพนักงานรับงาน', // Display a default message if null
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'LICENSE',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                  Text(
+                                    'Unknown', // Fallback to 'Unknown' if null
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'PHONE NUMBER',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                  Text(
+                                    'Unknown', // Fallback to 'Unknown' if null
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        ] else ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  ClipOval(
+                                    child: Image.network(
+                                      profilePicture
+                                          .toString(), // Convert to string in case it's null
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit
+                                          .cover, // Ensures the image fills the circular area
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  const Text(
+                                    'DRIVER',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                  Text(
+                                    username
+                                        .toString(), // Replace with dynamic license
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  const Text(
+                                    'LICENSE',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                  Text(
+                                    '${widget.order['plate_number'] ?? 'Unknown'}', // Replace with dynamic license
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  const Text(
+                                    'PHONE NUMBER',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                  Text(
+                                    '${widget.order['rider'] ?? 'Unknown'}', // Replace with dynamic phone number
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+
                         // Button for checking package picture
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
@@ -370,13 +442,21 @@ class _StatusorderState extends State<Statusorder> {
       widget.order['r_location_lat'],
       widget.order['r_location_lng'],
     );
+
+    // Fallback to a default location if latLng is null
+    LatLng initialCenter = latLng ??
+        LatLng(
+          widget.order['s_location_lat'],
+          widget.order['s_location_lng'],
+        ); // Default to coordinates (0, 0)
+
     return SizedBox(
       width: 400,
       height: 300,
       child: FlutterMap(
         mapController: mapController,
         options: MapOptions(
-          initialCenter: latLng!,
+          initialCenter: initialCenter, // Use the non-null value of latLng
           initialZoom: 17.0,
         ),
         children: [
