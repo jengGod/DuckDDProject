@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/DriverHomePage.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverProfile extends StatefulWidget {
   const DriverProfile({super.key});
@@ -10,8 +12,24 @@ class DriverProfile extends StatefulWidget {
 }
 
 class _DriverProfileState extends State<DriverProfile> {
-  int selectedIndex = 1;
+  String? username;
+  String? email;
+  String? phonenumber;
+  String? profilePicture;
+  String? plate_number;
 
+  int selectedIndex = 1;
+  Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username');
+      email = prefs.getString('email');
+      phonenumber = prefs.getString('phonenumber');
+      profilePicture = prefs.getString('profile_picture');
+      plate_number = prefs.getString('plate_number');
+    });
+  
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,13 +58,27 @@ class _DriverProfileState extends State<DriverProfile> {
             if (index == 2) {
               _showLogoutDialog(context); // Handle logout
             } else {
-              setState(() {
+              setState(() async{
+                 final FirebaseFirestore firestore = FirebaseFirestore.instance;
+                DocumentSnapshot DriverDoc = await firestore
+                    .collection('Drivers')
+                    .doc(phonenumber)
+                    .get();
+                String duty = DriverDoc['onDuty'];
                 selectedIndex = index;
                 if (selectedIndex == 0) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DriverPage()),
-                  );
+                   if (duty == 'รับงาน') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DriverPage()),
+                    );
+                  }
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
                     context,

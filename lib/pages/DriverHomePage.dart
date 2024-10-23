@@ -264,7 +264,7 @@ class _DriverPageState extends State<DriverPage> {
     );
   }
 
-  void acceptOrder(BuildContext context, Map<String, dynamic> order) async {
+  void acceptOrder(BuildContext context, Map<String, dynamic> order) async {//
     var position = await _determinePosition();
     log('${position.latitude} ${position.longitude}');
     lati = position.latitude;
@@ -280,6 +280,8 @@ class _DriverPageState extends State<DriverPage> {
       'plate_number': plate_number.toString(),
       'rider': phonenumber.toString(),
     };
+
+    var job = {'onDuty':"รับงาน"};
     log('plate num:' + plate_number.toString());
     log('phone num:' + phonenumber.toString());
     var location_driver = {'location_loti': lati, 'location_long': long};
@@ -296,6 +298,10 @@ class _DriverPageState extends State<DriverPage> {
           .collection('Driver_location')
           .doc(phonenumber.toString())
           .set(location_driver);
+      db
+          .collection('Drivers')
+          .doc(phonenumber.toString())
+          .set(job, SetOptions(merge: true));
     } catch (e) {
       log(e.toString());
     }
