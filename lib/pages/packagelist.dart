@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/StatusOrder.dart';
@@ -190,9 +192,9 @@ class _PackagelistState extends State<Packagelist> {
           ElevatedButton(
             onPressed: () {
               Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AllshipmentPage()),
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const AllshipmentPage()),
               );
             },
             child: const Text('View all shipments'), // Button text
@@ -226,40 +228,38 @@ class _PackagelistState extends State<Packagelist> {
                 }
 
                 return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView.builder(
-              itemCount: filteredList.length,
-              itemBuilder: (context, index) {
-                Map<String, dynamic> order = filteredList[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Card(
-                    color: const Color.fromARGB(255, 221, 216, 216),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    elevation: 4,
-                                child: Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image.network(
-                                        order['pic_1'] ?? '',
-                                        width: 120,
-                                        height: 120,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: Column(
-                                        
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                               const Text(   
-                                          'Status',
+                  padding: const EdgeInsets.all(16.0),
+                  child: ListView.builder(
+                    itemCount: filteredList.length,
+                    itemBuilder: (context, index) {
+                      Map<String, dynamic> order = filteredList[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Card(
+                          color: const Color.fromARGB(255, 221, 216, 216),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          elevation: 4,
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image.network(
+                                  order['pic_1'] ?? '',
+                                  width: 120,
+                                  height: 120,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      const Text('Status',
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -358,12 +358,14 @@ class _PackagelistState extends State<Packagelist> {
   }
 
   send(BuildContext context) {}
-  
+
   void More(BuildContext context, Map<String, dynamic> order) {
     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const Statusorder()),
-              );
+      context,
+      MaterialPageRoute(
+        builder: (context) => Statusorder(order: order),
+      ),
+    );
+    log(order['orderId'].toString());
   }
 }

@@ -53,7 +53,7 @@ class _DrivermapState extends State<Drivermap> {
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-      lati = position.latitude;
+      lati =  position.latitude;
       long = position.longitude;
 
       // Update Firestore with the new location
