@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/DriverHomePage.dart';
 import 'package:duckddproject/pages/DriverMap.dart';
 import 'package:duckddproject/pages/DriverProfile.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:duckddproject/pages/RegisterDriver.dart';
+import 'package:duckddproject/pages/RegisterUser.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverOrderPage extends StatefulWidget {
@@ -29,6 +34,11 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   String? phonenumber;
   String? profilePicture;
   String? plate_number;
+  XFile? image2;
+  XFile? image3;
+  final ImagePicker picker = ImagePicker();
+  String imageUrl2 = '';
+  String imageUrl3 = '';
 
   Timer? locationUpdateTimer;
   bool _isUpdatingLocation = false; // Track whether updates are active
@@ -182,168 +192,288 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            children: [
-              Card(
-                color: const Color.fromARGB(255, 221, 216, 216),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Card(
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    child: Column(
-                      children: [
-                        // แสดงรูปภาพจาก order['pic_1']
-                        Container(
-                          width: double.infinity,
-                          height: 180,
-                          color: Colors.yellow,
-                          child: order['pic_1'] != null
-                              ? Image.network(order['pic_1'], fit: BoxFit.cover)
-                              : const Center(
-                                  child: Text(
-                                    'PACKAGE IMAGE',
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              children: [
+                Card(
+                  color: const Color.fromARGB(255, 221, 216, 216),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Card(
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                      child: Column(
+                        children: [
+                          // แสดงรูปภาพจาก order['pic_1']
+                          Container(
+                            width: double.infinity,
+                            height: 180,
+                            color: Colors.yellow,
+                            child: order['pic_1'] != null
+                                ? Image.network(order['pic_1'],
+                                    fit: BoxFit.cover)
+                                : const Center(
+                                    child: Text(
+                                      'PACKAGE IMAGE',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                ),
-                        ),
-                        const SizedBox(height: 16),
-                        // แสดงข้อมูล sender และ receiver จาก order
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // Sender details
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text('Sender name'),
-                                  Text('${order['s_name'] ?? 'Unknown'}',
-                                      overflow: TextOverflow.ellipsis),
-                                  Text('Sender phonenumber'),
-                                  Text('${order['sender'] ?? 'Unknown'}',
-                                      overflow: TextOverflow.ellipsis),
-                                  Text('Sender address'),
-                                  Text('${order['s_address'] ?? 'Unknown'}',
-                                      overflow: TextOverflow.ellipsis),
-                                ],
-                              ),
-                            ),
-                            // Receiver details
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text('Receiver name'),
-                                  Text('${order['r_name'] ?? 'Unknown'}',
-                                      overflow: TextOverflow.ellipsis),
-                                  Text('Receiver phonenumber'),
-                                  Text('${order['receiver'] ?? 'Unknown'}',
-                                      overflow: TextOverflow.ellipsis),
-                                  Text('Receiver address'),
-                                  Text('${order['r_address'] ?? 'Unknown'}',
-                                      overflow: TextOverflow.ellipsis),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        // Delivered camera button
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
+                          ),
+                          const SizedBox(height: 16),
+                          // แสดงข้อมูล sender และ receiver จาก order
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              const Text(
-                                'DELIVERED',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.grey[300],
+                              // Sender details
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text('Sender name'),
+                                    Text('${order['s_name'] ?? 'Unknown'}',
+                                        overflow: TextOverflow.ellipsis),
+                                    Text('Sender phonenumber'),
+                                    Text('${order['sender'] ?? 'Unknown'}',
+                                        overflow: TextOverflow.ellipsis),
+                                    Text('Sender address'),
+                                    Text('${order['s_address'] ?? 'Unknown'}',
+                                        overflow: TextOverflow.ellipsis),
+                                  ],
                                 ),
-                                child: const Icon(Icons.camera_alt, size: 50),
+                              ),
+                              // Receiver details
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text('Receiver name'),
+                                    Text('${order['r_name'] ?? 'Unknown'}',
+                                        overflow: TextOverflow.ellipsis),
+                                    Text('Receiver phonenumber'),
+                                    Text('${order['receiver'] ?? 'Unknown'}',
+                                        overflow: TextOverflow.ellipsis),
+                                    Text('Receiver address'),
+                                    Text('${order['r_address'] ?? 'Unknown'}',
+                                        overflow: TextOverflow.ellipsis),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                          const SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'DELIVERING',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  width: 90,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.grey[300],
+                                  ),
+                                  child: image2 != null
+                                      ? GestureDetector(
+                                          onTap: () async {
+                                            log('start camera upload:');
+                                            image2 = await picker.pickImage(
+                                                source: ImageSource.camera);
+                                            if (image2 != null) {
+                                              log('image path:');
+                                              log(image2!.path);
+                                              imageUrl2 =
+                                                  await uploadImage(image2!);
+                                              setState(
+                                                  () {}); // Update UI after new image is captured
+                                            }
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: Image.file(
+                                              File(image2!.path),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        )
+                                      : IconButton(
+                                          icon: const Icon(
+                                            Icons.camera_alt_outlined,
+                                            size: 60,
+                                            color: Colors.black45,
+                                          ),
+                                          onPressed: () async {
+                                            log('start camera upload:');
+                                            image2 = await picker.pickImage(
+                                                source: ImageSource.camera);
+                                            if (image2 != null) {
+                                              log('image path:');
+                                              log(image2!.path);
+                                              imageUrl2 =
+                                                  await uploadImage(image2!);
+                                              setState(
+                                                  () {}); // Update UI after image is captured
+                                            }
+                                          },
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 2),
+
+// Delivered camera button
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'DELIVERED',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  width: 90,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.grey[300],
+                                  ),
+                                  child: image3 != null
+                                      ? GestureDetector(
+                                          onTap: () async {
+                                            log('start camera upload:');
+                                            image3 = await picker.pickImage(
+                                                source: ImageSource.camera);
+                                            if (image3 != null) {
+                                              log('image path:');
+                                              log(image3!.path);
+                                              imageUrl3 =
+                                                  await uploadImgderivered(
+                                                      image3!);
+                                              setState(
+                                                  () {}); // Update UI after new image is captured
+                                            }
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: Image.file(
+                                              File(image3!.path),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        )
+                                      : IconButton(
+                                          icon: const Icon(
+                                            Icons.camera_alt_outlined,
+                                            size: 60,
+                                            color: Colors.black45,
+                                          ),
+                                          onPressed: () async {
+                                            log('start camera upload:');
+                                            image3 = await picker.pickImage(
+                                                source: ImageSource.camera);
+                                            if (image3 != null) {
+                                              log('image path:');
+                                              log(image3!.path);
+                                              imageUrl3 =
+                                                  await uploadImgderivered(
+                                                      image3!);
+                                              setState(
+                                                  () {}); // Update UI after image is captured
+                                            }
+                                          },
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SingleChildScrollView(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    SizedBox(
-                      width: 130, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
-                      child: ElevatedButton(
-                        onPressed: () {
-                          completeOrder();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green, // Background color
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16), // แค่ padding แนวตั้ง
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        child: const Text(
-                          'Order complete',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16), // เว้นระยะห่างระหว่างปุ่มทั้งสอง
-                    SizedBox(
-                      width: 130, // ขนาดเท่ากันกับปุ่มแรก
-                      child: ElevatedButton(
-                        onPressed: () {
-                          stopLocationUpdates();
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Drivermap(order: order),
+                const SizedBox(height: 20),
+                SingleChildScrollView(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        width: 130, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
+                        child: ElevatedButton(
+                          onPressed: () {
+                            completeOrder();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green, // Background color
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16), // แค่ padding แนวตั้ง
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16), // แค่ padding แนวตั้ง
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
                           ),
-                        ),
-                        child: const Text(
-                          'View map',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
+                          child: const Text(
+                            'Order complete',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+                      const SizedBox(
+                          width: 16), // เว้นระยะห่างระหว่างปุ่มทั้งสอง
+                      SizedBox(
+                        width: 130, // ขนาดเท่ากันกับปุ่มแรก
+                        child: ElevatedButton(
+                          onPressed: () {
+                            stopLocationUpdates();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Drivermap(order: order),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16), // แค่ padding แนวตั้ง
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          child: const Text(
+                            'View map',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -435,5 +565,61 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
         );
       },
     );
+  }
+
+  Future<String> uploadImage(XFile image) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    var db = FirebaseFirestore.instance;
+    // สร้าง Reference สำหรับ Firebase Storage
+    final storageRef = FirebaseStorage.instance.ref();
+
+    // สร้าง path สำหรับเก็บรูปภาพ
+    final imageRef = storageRef.child('pic_2/${image.name}');
+
+    // อัปโหลดรูปภาพ
+    await imageRef.putFile(File(image.path));
+
+    // รับ URL ของรูปภาพที่ถูกอัปโหลด
+    String downloadURL = await imageRef.getDownloadURL();
+    var data ={'pic_2':downloadURL,
+    'order_status':"3"};
+    if(downloadURL.isNotEmpty){
+      
+      db
+          .collection('Orders')
+          .doc(widget.order['orderId'])
+          .set(data, SetOptions(merge: true));
+    }
+    
+
+  
+
+    return downloadURL;
+  }
+
+  Future<String> uploadImgderivered(XFile image) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    var db = FirebaseFirestore.instance;
+    // สร้าง Reference สำหรับ Firebase Storage
+    final storageRef = FirebaseStorage.instance.ref();
+
+    // สร้าง path สำหรับเก็บรูปภาพ
+    final imageRef = storageRef.child('pic_3/${image.name}');
+
+    // อัปโหลดรูปภาพ
+    await imageRef.putFile(File(image.path));
+
+    // รับ URL ของรูปภาพที่ถูกอัปโหลด
+    String downloadURL = await imageRef.getDownloadURL();
+    var data ={'pic_3':downloadURL,
+    'order_status':"4"};
+    if(downloadURL.isNotEmpty){
+      
+      db
+          .collection('Orders')
+          .doc(widget.order['orderId'])
+          .set(data, SetOptions(merge: true));
+    }
+    return downloadURL;
   }
 }
