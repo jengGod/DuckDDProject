@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/DriverHomePage.dart';
 import 'package:duckddproject/pages/DriverMap.dart';
@@ -9,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverOrderPage extends StatefulWidget {
   final Map<String, dynamic> order;
-  
 
   const DriverOrderPage({super.key, required this.order});
 
@@ -19,8 +21,8 @@ class DriverOrderPage extends StatefulWidget {
 
 class _DriverOrderPageState extends State<DriverOrderPage> {
   int selectedIndex = 0;
-  double lati=0;
-  double long=0;
+  double lati = 0;
+  double long = 0;
 
   String? username;
   String? email;
@@ -28,10 +30,55 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   String? profilePicture;
   String? plate_number;
 
+  Timer? locationUpdateTimer;
+  bool _isUpdatingLocation = false; // Track whether updates are active
+  Timer? locationTimer;
   @override
   void initState() {
     super.initState();
     loadUserData();
+    startLocationUpdates();
+  }
+
+  void startLocationUpdates() {
+    // Start updating only if not already updating
+    if (!_isUpdatingLocation) {
+      _isUpdatingLocation = true;
+
+      // Start a Timer that updates the location every 5 seconds (for example)
+      locationTimer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+        updateDriverLocation();
+      });
+    }
+  }
+
+  Future<void> updateDriverLocation() async {
+    if (phonenumber == null || !_isUpdatingLocation) return;
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      lati = position.latitude;
+      long = position.longitude;
+
+      // Update Firestore with the new location
+      await FirebaseFirestore.instance
+          .collection('Driver_location')
+          .doc(phonenumber)
+          .set({
+        'location_loti': lati,
+        'location_long': long,
+      });
+
+      // Only call setState if the widget is still mounted
+      if (mounted) {
+        setState(() {
+          log('Updated Location: lati: $lati, long: $long');
+        });
+      }
+    } catch (e) {
+      log('Error updating location: $e');
+    }
   }
 
   Future<void> loadUserData() async {
@@ -45,21 +92,25 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
     });
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     try {
-      DocumentSnapshot locationDoc = await firestore
-          .collection('Driver_location')
-          .doc(phonenumber)
-          .get();
+      DocumentSnapshot locationDoc =
+          await firestore.collection('Driver_location').doc(phonenumber).get();
       lati = locationDoc['location_loti'];
       long = locationDoc['location_long'];
     } catch (e) {}
   }
-  
+
+  @override
+  void dispose() {
+    // Stop location updates when the widget is disposed
+    stopLocationUpdates();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // ดึงข้อมูล order จาก widget.order
-  Map<String, dynamic> order = widget.order;
+    Map<String, dynamic> order = widget.order;
 
- 
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 1.0),
@@ -243,7 +294,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Drivermap(order:order),
+                            builder: (context) => Drivermap(order: order),
                           ),
                         );
                       },
@@ -302,8 +353,16 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
     );
   }
 
+  void stopLocationUpdates() {
+    // Cancel the Timer to stop location updates
+    if (locationTimer != null) {
+      locationTimer!.cancel();
+      locationTimer = null;
+    }
+    _isUpdatingLocation = false;
+  }
+
   void completeOrder() {
-    //delete order
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -319,6 +378,10 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
             ),
             TextButton(
               onPressed: () async {
+                // Stop location updates
+                stopLocationUpdates();
+
+                // Navigate to another page after completing the order
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const DriverPage()),
@@ -331,43 +394,4 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
       },
     );
   }
-
-  Future<Position> realTimePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-    
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
-  }
-
-  
 }

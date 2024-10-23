@@ -15,7 +15,7 @@ import 'package:latlong2/latlong.dart';
 
 class Registeruser extends StatefulWidget {
   final LatLng? selectedLocation;
-  const Registeruser({super.key, this.selectedLocation });
+  const Registeruser({super.key, this.selectedLocation});
 
   @override
   State<Registeruser> createState() => _RegisteruserState();
@@ -34,11 +34,15 @@ bool isLocationChecked = false;
 XFile? image;
 final ImagePicker picker = ImagePicker();
 String imageUrl = '';
-double lati=0;
-double long=0;
+double lati = 0;
+double long = 0;
 bool ispassCtl = false;
 bool ispasswordCtl = false;
+
 class _RegisteruserState extends State<Registeruser> {
+  bool isLocationSelected = false;
+  final _formKey = GlobalKey<FormState>();
+
   // ตรวจสอบว่าข้อมูลกรอกครบทุกช่องหรือยัง
   bool _isFormComplete() {
     return usernameCtl.text.isNotEmpty &&
@@ -47,7 +51,8 @@ class _RegisteruserState extends State<Registeruser> {
         addressCtl.text.isNotEmpty &&
         passwordCtl.text.isNotEmpty &&
         passCtl.text.isNotEmpty &&
-        image != null;
+        image != null &&
+        widget.selectedLocation != null;
   }
 
   @override
@@ -79,13 +84,13 @@ class _RegisteruserState extends State<Registeruser> {
                 ClipOval(
                   child: Container(
                     height: 100,
-                    width: 100, 
+                    width: 100,
                     color: Colors.grey[300],
                     child: Image.file(
                       File(image!.path),
                       fit: BoxFit.cover,
-                      width: 150, 
-                      height: 150, 
+                      width: 150,
+                      height: 150,
                     ),
                   ),
                 ),
@@ -136,23 +141,39 @@ class _RegisteruserState extends State<Registeruser> {
                 ),
               ),
               const SizedBox(height: 20),
-              TextField(
-                controller: emailCtl,
-                keyboardType: TextInputType.emailAddress,
-                inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
-                ],
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  filled: true,
-                  fillColor: Color(0xFFF0ECF6),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                    borderSide: BorderSide.none,
+              Form(
+                key: _formKey,
+                child: TextFormField(
+                  controller: emailCtl,
+                  keyboardType: TextInputType.emailAddress,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(
+                        RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    filled: true,
+                    fillColor: Color(0xFFF0ECF6),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    // ตรวจสอบว่าอีเมลมีรูปแบบถูกต้องหรือไม่
+                    String pattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
+                    RegExp regex = RegExp(pattern);
+                    if (!regex.hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
               ),
+
               const SizedBox(height: 20),
               TextField(
                 controller: addressCtl,
@@ -176,6 +197,10 @@ class _RegisteruserState extends State<Registeruser> {
                 controller: phoneCtl,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
+                  FilteringTextInputFormatter
+                      .digitsOnly, // รับเฉพาะตัวเลขเท่านั้น
+                  LengthLimitingTextInputFormatter(
+                      10), // จำกัดความยาวที่ 10 หลัก
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
@@ -192,13 +217,12 @@ class _RegisteruserState extends State<Registeruser> {
               const SizedBox(height: 20),
               TextField(
                 controller: passwordCtl,
-                 obscureText:
-                      !ispasswordCtl,
+                obscureText: !ispasswordCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')), // ไม่ให้กรอก spacebar
                 ],
-                decoration:  InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Password',
                   filled: true,
                   fillColor: const Color(0xFFF0ECF6),
@@ -207,30 +231,26 @@ class _RegisteruserState extends State<Registeruser> {
                     borderSide: BorderSide.none,
                   ),
                   suffixIcon: IconButton(
-                      icon: Icon(
-                        ispasswordCtl
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          ispasswordCtl = !ispasswordCtl;
-                        });
-                      },
+                    icon: Icon(
+                      ispasswordCtl ? Icons.visibility : Icons.visibility_off,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        ispasswordCtl = !ispasswordCtl;
+                      });
+                    },
+                  ),
                 ),
-                
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: passCtl,
-                obscureText:
-                      !ispassCtl,
+                obscureText: !ispassCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar kub
                 ],
-                decoration:  InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Confirm Password',
                   filled: true,
                   fillColor: const Color(0xFFF0ECF6),
@@ -239,17 +259,15 @@ class _RegisteruserState extends State<Registeruser> {
                     borderSide: BorderSide.none,
                   ),
                   suffixIcon: IconButton(
-                      icon: Icon(
-                        ispassCtl
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          ispassCtl = !ispassCtl;
-                        });
-                      },
+                    icon: Icon(
+                      ispassCtl ? Icons.visibility : Icons.visibility_off,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        ispassCtl = !ispassCtl;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -267,11 +285,12 @@ class _RegisteruserState extends State<Registeruser> {
               //         long = position.longitude;
               //       }
               //     }),
-               ElevatedButton(
+              ElevatedButton(
                 // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
-                onPressed: () { GpsMap(context);},
+                onPressed: () {
+                  GpsMap(context);
+                },
 
-                        
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   padding:
@@ -288,7 +307,7 @@ class _RegisteruserState extends State<Registeruser> {
                   ),
                 ),
               ),
-                 const SizedBox(height: 5),
+              const SizedBox(height: 5),
               ElevatedButton(
                 // ปุ่มจะทำงานเฉพาะเมื่อข้อมูลครบและปุ่มยังไม่ถูกกด
                 onPressed: !_isFormComplete() || _isButtonPressed
@@ -344,70 +363,69 @@ class _RegisteruserState extends State<Registeruser> {
   }
 
   void register(BuildContext context) async {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  if (passwordCtl.text != passCtl.text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Passwords do not match')),
-    );
-    return;
-  }
+    if (passwordCtl.text != passCtl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
 
-  DocumentSnapshot userDoc =
-      await firestore.collection('Users').doc(phoneCtl.text).get();
-  DocumentSnapshot driverDoc =
-      await firestore.collection('Drivers').doc(phoneCtl.text).get();
+    DocumentSnapshot userDoc =
+        await firestore.collection('Users').doc(phoneCtl.text).get();
+    DocumentSnapshot driverDoc =
+        await firestore.collection('Drivers').doc(phoneCtl.text).get();
 
-  if (userDoc.exists || driverDoc.exists) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text(
-              'Phone number already exists. Please use another Phone number.')),
-    );
-    return; // Stop registration
-  }
+    if (userDoc.exists || driverDoc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                'Phone number already exists. Please use another Phone number.')),
+      );
+      return; // Stop registration
+    }
 
-  String hashedPassword =
-      sha256.convert(utf8.encode(passwordCtl.text)).toString();
-  var db = FirebaseFirestore.instance;
-  var data = {
-    'username': usernameCtl.text,
-    'email': emailCtl.text,
-    'phonenumber': phoneCtl.text,
-    'address': addressCtl.text,
-    'password': hashedPassword,
-    'profile_picture': imageUrl,
-  };
-
-  if (widget.selectedLocation != null) {
-    // Store the selected location coordinates if available
-  log('Selected Latitude: ${widget.selectedLocation!.latitude}');
-  log('Selected Longitude: ${widget.selectedLocation!.longitude}');
-    var location_user = {
-      'location_loti': widget.selectedLocation!.latitude,
-      'location_long': widget.selectedLocation!.longitude,
+    String hashedPassword =
+        sha256.convert(utf8.encode(passwordCtl.text)).toString();
+    var db = FirebaseFirestore.instance;
+    var data = {
+      'username': usernameCtl.text,
+      'email': emailCtl.text,
+      'phonenumber': phoneCtl.text,
+      'address': addressCtl.text,
+      'password': hashedPassword,
+      'profile_picture': imageUrl,
     };
-    db.collection('Users_location').doc(phoneCtl.text).set(location_user);
-  } else {
-    // If no location was selected manually, use current GPS location
-    var position = await _determinePosition();
-    var location_user = {
-      'location_loti': position.latitude,
-      'location_long': position.longitude,
-    };
-    db.collection('Users_location').doc(phoneCtl.text).set(location_user);
+
+    if (widget.selectedLocation != null) {
+      // Store the selected location coordinates if available
+      log('Selected Latitude: ${widget.selectedLocation!.latitude}');
+      log('Selected Longitude: ${widget.selectedLocation!.longitude}');
+      var location_user = {
+        'location_loti': widget.selectedLocation!.latitude,
+        'location_long': widget.selectedLocation!.longitude,
+      };
+      db.collection('Users_location').doc(phoneCtl.text).set(location_user);
+    } else {
+      // If no location was selected manually, use current GPS location
+      var position = await _determinePosition();
+      var location_user = {
+        'location_loti': position.latitude,
+        'location_long': position.longitude,
+      };
+      db.collection('Users_location').doc(phoneCtl.text).set(location_user);
+    }
+
+    db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
+      // Navigate to LoginPage or another page as needed
+      Navigator.pop(context);
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    });
   }
-
-  db.collection('Users').doc(phoneCtl.text).set(data).then((_) {
-    // Navigate to LoginPage or another page as needed
-    Navigator.pop(context);
-  }).catchError((error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $error')),
-    );
-  });
-}
-
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -445,9 +463,9 @@ class _RegisteruserState extends State<Registeruser> {
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
   }
-  
+
   void GpsMap(BuildContext context) {
-     Navigator.pushReplacement(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const Location()),
     );
