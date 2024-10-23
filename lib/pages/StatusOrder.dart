@@ -293,12 +293,12 @@ class _StatusorderState extends State<Statusorder> {
                         ),
                         if (widget.order['rider'] == null ||
                             widget.order['rider'].toString().isEmpty) ...[
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Column(
                                 children: [
-                                  const Text(
+                                  Text(
                                     'DRIVER',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -312,7 +312,7 @@ class _StatusorderState extends State<Statusorder> {
                               ),
                               Column(
                                 children: [
-                                  const Text(
+                                  Text(
                                     'LICENSE',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -320,13 +320,13 @@ class _StatusorderState extends State<Statusorder> {
                                   ),
                                   Text(
                                     'Unknown', // Fallback to 'Unknown' if null
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(fontSize: 12),
                                   ),
                                 ],
                               ),
                               Column(
                                 children: [
-                                  const Text(
+                                  Text(
                                     'PHONE NUMBER',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -334,7 +334,7 @@ class _StatusorderState extends State<Statusorder> {
                                   ),
                                   Text(
                                     'Unknown', // Fallback to 'Unknown' if null
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(fontSize: 12),
                                   ),
                                 ],
                               ),
