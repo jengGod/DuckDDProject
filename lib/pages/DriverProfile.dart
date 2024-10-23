@@ -58,27 +58,15 @@ class _DriverProfileState extends State<DriverProfile> {
             if (index == 2) {
               _showLogoutDialog(context); // Handle logout
             } else {
-              setState(() async{
-                 final FirebaseFirestore firestore = FirebaseFirestore.instance;
-                DocumentSnapshot DriverDoc = await firestore
-                    .collection('Drivers')
-                    .doc(phonenumber)
-                    .get();
-                String duty = DriverDoc['onDuty'];
+              setState(() {
                 selectedIndex = index;
                 if (selectedIndex == 0) {
-                   if (duty == 'รับงาน') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
-                    );
-                  } else {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => const DriverPage()),
                     );
-                  }
+                  
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
                     context,

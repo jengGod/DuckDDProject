@@ -136,46 +136,48 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
               const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
-            if (index == 2) {
-              _showLogoutDialog(context); // Handle logout
-            } else {
-              setState(() async {
-                selectedIndex = index;
-                final FirebaseFirestore firestore = FirebaseFirestore.instance;
-                DocumentSnapshot DriverDoc = await firestore
-                    .collection('Drivers')
-                    .doc(phonenumber)
-                    .get();
-                String duty = DriverDoc['onDuty'];
-                if (selectedIndex == 0) {
-                  if (duty == 'รับงาน') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DriverPage()),
-                    );
-                  }
-                } else if (selectedIndex == 1) {
-                  if (duty == 'รับงาน') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DriverProfile()),
-                    );
-                  }
+            setState(() async {
+              selectedIndex = index;
+              final FirebaseFirestore firestore = FirebaseFirestore.instance;
+              DocumentSnapshot DriverDoc =
+                  await firestore.collection('Drivers').doc(phonenumber).get();
+              String duty = DriverDoc['onDuty'];
+              if (selectedIndex == 0) {
+                if (duty == 'รับงาน') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DriverPage()),
+                  );
                 }
-              });
-            }
+              } else if (selectedIndex == 1) {
+                if (duty == 'รับงาน') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DriverProfile()),
+                  );
+                }
+              } else if (selectedIndex == 2) {
+                if (duty == 'รับงาน') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                  );
+                } else {
+                  _showLogoutDialog(context);
+                }
+              }
+            });
           },
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
@@ -285,7 +287,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 160, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
+                    width: 140, // กำหนดขนาดให้ทั้งสองปุ่มเท่ากัน
                     child: ElevatedButton(
                       onPressed: () {
                         completeOrder();
@@ -309,7 +311,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                   ),
                   const SizedBox(width: 16), // เว้นระยะห่างระหว่างปุ่มทั้งสอง
                   SizedBox(
-                    width: 160, // ขนาดเท่ากันกับปุ่มแรก
+                    width: 140, // ขนาดเท่ากันกับปุ่มแรก
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushReplacement(
