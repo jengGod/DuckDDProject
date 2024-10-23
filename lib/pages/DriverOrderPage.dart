@@ -315,6 +315,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                       width: 130, // ขนาดเท่ากันกับปุ่มแรก
                       child: ElevatedButton(
                         onPressed: () {
+                          stopLocationUpdates();
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -365,6 +366,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
             ),
             TextButton(
               onPressed: () {
+                stopLocationUpdates();
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -414,6 +416,10 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                       .collection('Drivers')
                       .doc(phonenumber.toString())
                       .set(job, SetOptions(merge: true));
+                  db
+                      .collection('Shipping')
+                      .doc(phonenumber.toString())
+                      .delete();
                 } catch (e) {
                   log(e.toString());
                 }
