@@ -227,9 +227,6 @@ class _StatusorderState extends State<Statusorder> {
           child: Column(
             children: [
               showMap(),
-              const SizedBox(
-                height: 40,
-              ),
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0), // Rounded corners
@@ -341,69 +338,78 @@ class _StatusorderState extends State<Statusorder> {
                             ],
                           )
                         ],
-                        if (widget.order['rider'] != null && widget.order['rider'].toString().isNotEmpty) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Column(
-                                children: [
-                                  ClipOval(
-                                    child: Image.network(
-                                      profilePicture
-                                          .toString(), // Convert to string in case it's null
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit
-                                          .cover, // Ensures the image fills the circular area
+                        if (widget.order['rider'] != null &&
+                            widget.order['rider'].toString().isNotEmpty) ...[
+                          if (profilePicture == null ||
+                              profilePicture.toString().isEmpty ||
+                              username == null ||
+                              username.toString().isEmpty) ...[
+                            Center(
+                              child:
+                                  CircularProgressIndicator(), // Show loading spinner while data is being loaded
+                            ),
+                          ] else ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  children: [
+                                    ClipOval(
+                                      child: Image.network(
+                                        profilePicture
+                                            .toString(), // Display profile picture
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  )
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  const Text(
-                                    'DRIVER',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12),
-                                  ),
-                                  Text(
-                                    username
-                                        .toString(), // Replace with dynamic license
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  const Text(
-                                    'LICENSE',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12),
-                                  ),
-                                  Text(
-                                    '${widget.order['plate_number'] ?? 'Unknown'}', // Replace with dynamic license
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  const Text(
-                                    'PHONE NUMBER',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12),
-                                  ),
-                                  Text(
-                                    '${widget.order['rider'] ?? 'Unknown'}', // Replace with dynamic phone number
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    const Text(
+                                      'DRIVER',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                    Text(
+                                      username.toString(), // Display username
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    const Text(
+                                      'LICENSE',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                    Text(
+                                      '${widget.order['plate_number'] ?? 'Unknown'}', // Display plate number or fallback to 'Unknown'
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    const Text(
+                                      'PHONE NUMBER',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                    Text(
+                                      '${widget.order['rider'] ?? 'Unknown'}', // Display rider's phone number or fallback to 'Unknown'
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
 
                         // Button for checking package picture
@@ -452,7 +458,7 @@ class _StatusorderState extends State<Statusorder> {
 
     return SizedBox(
       width: 400,
-      height: 300,
+      height: 500,
       child: FlutterMap(
         mapController: mapController,
         options: MapOptions(
