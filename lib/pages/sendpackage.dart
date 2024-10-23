@@ -631,6 +631,7 @@ class _SendPageState extends State<SendPage> {
       's_location_lng': longSend,
       'pic_1': imageUrl,
       'pic_2': "",
+      'pic_3': "",
       'name': packageNameCtl.text,
       'descrip': packageDescriptionCtl.text,
       'rider': "",
