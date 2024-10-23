@@ -248,7 +248,7 @@ class _RegisteruserState extends State<Registeruser> {
                 obscureText: !ispassCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')), // ไม่ให้กรอก spacebar
+                      RegExp(r'\s')), // ไม่ให้กรอก spacebar kub
                 ],
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
