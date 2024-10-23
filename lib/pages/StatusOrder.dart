@@ -125,7 +125,6 @@ class _StatusorderState extends State<Statusorder> {
     }
 
     // Start updating only if not already updating
-    if (widget.order['rider'].toString == null) return;
     if (!_isUpdatingLocation) {
       _isUpdatingLocation = true;
 
