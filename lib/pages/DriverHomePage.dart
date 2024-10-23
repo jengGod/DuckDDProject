@@ -24,8 +24,8 @@ class _DriverPageState extends State<DriverPage> {
   String? profilePicture;
   String? plate_number;
 
-  double lati=0;
-  double long=0;
+  double lati = 0;
+  double long = 0;
   @override
   void initState() {
     super.initState();
@@ -49,7 +49,8 @@ class _DriverPageState extends State<DriverPage> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 1.0),
         child: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 252, 227, 3), // Yellow background
+          backgroundColor:
+              const Color.fromARGB(255, 252, 227, 3), // Yellow background
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -65,7 +66,8 @@ class _DriverPageState extends State<DriverPage> {
             ),
           ],
           currentIndex: selectedIndex,
-          selectedItemColor: const Color.fromARGB(255, 110, 112, 110), // Selected item color
+          selectedItemColor:
+              const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
             if (index == 2) {
@@ -81,7 +83,8 @@ class _DriverPageState extends State<DriverPage> {
                 } else if (selectedIndex == 1) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const DriverProfile()),
+                    MaterialPageRoute(
+                        builder: (context) => const DriverProfile()),
                   );
                 }
               });
@@ -103,6 +106,9 @@ class _DriverPageState extends State<DriverPage> {
           // If the data is available
           final List<Map<String, dynamic>> filteredList = snapshot.data!.docs
               .map((doc) => doc.data() as Map<String, dynamic>)
+              .where((doc) =>
+                  doc['order_status'] ==
+                  "1") // Filter documents with order_status == "1"
               .toList();
 
           return Padding(
@@ -127,9 +133,11 @@ class _DriverPageState extends State<DriverPage> {
                             // color: const Color.fromARGB(255, 252, 227, 3),
                             // width: 120,
                             // height: 120,
-                            child: Image.network(order['pic_1'] ?? '',
-                            width: 120,
-                            height: 120,), // Display image
+                            child: Image.network(
+                              order['pic_1'] ?? '',
+                              width: 120,
+                              height: 120,
+                            ), // Display image
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -142,7 +150,8 @@ class _DriverPageState extends State<DriverPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16.0, 0, 0, 0),
                                     child: Text(
                                       'Sender: ${(order['sender'] ?? 'Unknown')}',
                                       style: const TextStyle(
@@ -152,7 +161,8 @@ class _DriverPageState extends State<DriverPage> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16.0, 0, 0, 0),
                                     child: Text(
                                       'Receiver: ${(order['receiver'] ?? 'Unknown')}',
                                       style: const TextStyle(
@@ -162,7 +172,8 @@ class _DriverPageState extends State<DriverPage> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16.0, 0, 0, 0),
                                     child: Text(
                                       'description:  ${(order['descrip'] ?? 'Unknown')}',
                                       style: const TextStyle(
@@ -172,7 +183,8 @@ class _DriverPageState extends State<DriverPage> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16.0, 0, 0, 0),
                                     child: Text(
                                       'destination: ${(order['r_address'] ?? 'Unknown')}',
                                       style: const TextStyle(
@@ -236,7 +248,7 @@ class _DriverPageState extends State<DriverPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () async{
+              onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 await prefs.clear();
                 Navigator.pushReplacement(
@@ -252,7 +264,7 @@ class _DriverPageState extends State<DriverPage> {
     );
   }
 
-  void acceptOrder(BuildContext context, Map<String, dynamic> order) async{
+  void acceptOrder(BuildContext context, Map<String, dynamic> order) async {
     var position = await _determinePosition();
     log('${position.latitude} ${position.longitude}');
     lati = position.latitude;
@@ -264,25 +276,28 @@ class _DriverPageState extends State<DriverPage> {
     var db = FirebaseFirestore.instance;
 
     var data = {
-      'order_status':'2',
-      'plate_number':plate_number.toString(),
-      'rider':phonenumber.toString(),
+      'order_status': '2',
+      'plate_number': plate_number.toString(),
+      'rider': phonenumber.toString(),
     };
-    log('plate num:'+plate_number.toString());
-    log('phone num:'+phonenumber.toString());
-    var location_driver = {
-      'location_loti': lati,
-      'location_long': long
-    };
-    log('lat:'+lati.toString());
-    log('lng:'+long.toString());
-    
+    log('plate num:' + plate_number.toString());
+    log('phone num:' + phonenumber.toString());
+    var location_driver = {'location_loti': lati, 'location_long': long};
+    log('lat:' + lati.toString());
+    log('lng:' + long.toString());
+
     try {
       log('Start Order');
-      db.collection('Orders').doc(order['orderId']).set(data, SetOptions(merge: true));
-      db.collection('Driver_location').doc(phonenumber.toString()).set(location_driver);
+      db
+          .collection('Orders')
+          .doc(order['orderId'])
+          .set(data, SetOptions(merge: true));
+      db
+          .collection('Driver_location')
+          .doc(phonenumber.toString())
+          .set(location_driver);
     } catch (e) {
-       log(e.toString());
+      log(e.toString());
     }
     //เก็บตำแหน่งปัจจุบัญ
     Navigator.pushReplacement(
@@ -290,7 +305,6 @@ class _DriverPageState extends State<DriverPage> {
       MaterialPageRoute(builder: (context) => DriverOrderPage(order: order)),
     );
   }
-
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -323,10 +337,9 @@ class _DriverPageState extends State<DriverPage> {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-    
+
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
   }
-  
 }
