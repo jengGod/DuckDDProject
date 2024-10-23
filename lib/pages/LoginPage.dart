@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:duckddproject/pages/DriverHomePage.dart';
+import 'package:duckddproject/pages/DriverOrderPage.dart';
 import 'package:duckddproject/pages/RegisterDriver.dart';
 import 'package:duckddproject/pages/RegisterUser.dart';
 import 'package:duckddproject/pages/UserHome.dart';
@@ -20,7 +21,7 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
-   
+
 class _LoginPageState extends State<LoginPage> {
   TextEditingController phoneCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
@@ -240,8 +241,10 @@ class _LoginPageState extends State<LoginPage> {
     try {
       // ตรวจสอบข้อมูลใน Firestore
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      DocumentSnapshot userDoc = await firestore.collection('Users').doc(phoneCtl.text).get();
-      DocumentSnapshot driverDoc = await firestore.collection('Drivers').doc(phoneCtl.text).get();
+      DocumentSnapshot userDoc =
+          await firestore.collection('Users').doc(phoneCtl.text).get();
+      DocumentSnapshot driverDoc =
+          await firestore.collection('Drivers').doc(phoneCtl.text).get();
 
       if (userDoc.exists) {
         // ตรวจสอบรหัสผ่าน
@@ -252,13 +255,12 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.setString('phonenumber', userData['phonenumber']);
           await prefs.setString('profile_picture', userData['profile_picture']);
           await prefs.setString('address', userData['address']);
-          await prefs.setString('password', passCtl.text); 
+          await prefs.setString('password', passCtl.text);
           log('Login successful!');
-         
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => UserHomePage()),
-           
           );
         } else {
           log('Incorrect password.');
@@ -266,20 +268,45 @@ class _LoginPageState extends State<LoginPage> {
             const SnackBar(content: Text('Incorrect password')),
           );
         }
-      }else if(driverDoc.exists){
+      } else if (driverDoc.exists) {
         if (driverDoc['password'] == hashedPassword) {
-          var driverData = driverDoc .data() as Map<String, dynamic>;
+          var driverData = driverDoc.data() as Map<String, dynamic>;
           await prefs.setString('username', driverData['username']);
           await prefs.setString('email', driverData['email']);
           await prefs.setString('phonenumber', driverData['phonenumber']);
-          await prefs.setString('profile_picture', driverData['profile_picture']);
+          await prefs.setString(
+              'profile_picture', driverData['profile_picture']);
           await prefs.setString('plate_number', driverData['license']);
           log('Login successful!');
-          
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => DriverPage()),//--------------------**
-          );
+          log('duty:' + driverData['onDuty']);
+
+          if (driverData['onDuty'] == "ว่างงาน") {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => DriverPage()),
+            );
+          } else {
+            DocumentSnapshot shipDoc = await firestore
+                .collection('Shipping')
+                .doc(driverData['phonenumber'].toString())
+                .get();
+            
+            if (shipDoc.exists) {
+              log('orderId:'+shipDoc['orderId']);
+              DocumentSnapshot orderDoc = await firestore
+                  .collection('Orders')
+                  .doc(shipDoc['orderId'].toString())
+                  .get();
+              log(orderDoc['s_address']);
+              Map<String, dynamic> order =
+                  orderDoc.data() as Map<String, dynamic>;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DriverOrderPage(order: order)),
+              );
+            }
+          }
         } else {
           log('Incorrect password.');
           ScaffoldMessenger.of(context).showSnackBar(
@@ -289,7 +316,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         log('No user found with that Phonenumber.');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No user found with that Phonenumber.')),
+          const SnackBar(content: Text('No user found with that Phonenumber.')),
         );
       }
     } catch (e) {
@@ -298,6 +325,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+//new collection   onShipping   phone,orderId    confirmOrder delete it
 void register(BuildContext context) {
   Navigator.push(
     context,

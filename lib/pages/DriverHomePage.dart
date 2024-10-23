@@ -282,6 +282,8 @@ class _DriverPageState extends State<DriverPage> {
     };
 
     var job = {'onDuty':"รับงาน"};
+    var shipping = {'orderId':order['orderId'],
+    'driver':phonenumber.toString()};
     log('plate num:' + plate_number.toString());
     log('phone num:' + phonenumber.toString());
     var location_driver = {'location_loti': lati, 'location_long': long};
@@ -302,6 +304,10 @@ class _DriverPageState extends State<DriverPage> {
           .collection('Drivers')
           .doc(phonenumber.toString())
           .set(job, SetOptions(merge: true));
+      db
+          .collection('Shipping')
+          .doc(phonenumber.toString())
+          .set(shipping);
     } catch (e) {
       log(e.toString());
     }
