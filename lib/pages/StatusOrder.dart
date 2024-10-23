@@ -340,7 +340,8 @@ class _StatusorderState extends State<Statusorder> {
                               ),
                             ],
                           )
-                        ] else ...[
+                        ],
+                        if (widget.order['rider'] != null && widget.order['rider'].toString().isNotEmpty) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
