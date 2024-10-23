@@ -200,6 +200,16 @@ class _StatusorderState extends State<Statusorder> {
               ],
             ),
           ),
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+               Image.asset(
+                    'assets/image/duck.png', 
+                    width: 20,
+                    height: 20,
+                  ),
+            ],
+          ),
           // Progress indicator
           // const Padding(
           //   padding: EdgeInsets.symmetric(vertical: 10),
@@ -220,12 +230,17 @@ class _StatusorderState extends State<Statusorder> {
                     width: 20,
                     height: 20,
                   ),
-                  const Text(
+                 
+                ],
+              ),
+              const Column(
+                children: [
+                  Text(
                     'DRIVER',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
-                  const Text(
-                    'Mark', // Replace with dynamic driver name
+                  Text(
+                    'Mark', // Replace with dynamic license
                     style: TextStyle(fontSize: 12),
                   ),
                 ],
