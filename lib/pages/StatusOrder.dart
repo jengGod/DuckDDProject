@@ -34,6 +34,9 @@ class _StatusorderState extends State<Statusorder> {
   Timer? locationUpdateTimer;
   Timer? locationTimer;
 
+  double lati = 0;
+  double long = 0;
+
   bool _isUpdatingLocation = false;
   @override
   void initState() {
@@ -51,17 +54,17 @@ class _StatusorderState extends State<Statusorder> {
           .get();
       var data = documentSnapshot.data();
        if (data != null){
-        double lati = data?['location_loti'];
-        double long = data?['location_long'];
-         setState(() {
-        latLng = LatLng(lati, long);
+        setState(() {
+          lati = data?['location_loti'];
+          long = data?['location_long'];
+          latLng = LatLng(lati, long);
         log('Driver Location: lati: $lati, long: $long');
         });
        }else {
         log('No latitude or longitude found in Firestore document');
       }
       if (latLng != null) {
-        mapController.move(latLng!, 17.0);
+        mapController.move(latLng!, 18.0);
       }
     } catch (e) {
       log('Error updating location: $e');
@@ -74,7 +77,7 @@ class _StatusorderState extends State<Statusorder> {
       _isUpdatingLocation = true;
 
       // Start a Timer that updates the location every 5 seconds (for example)
-      locationTimer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      locationTimer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
         driverLocation();
       });
     }
@@ -321,7 +324,7 @@ Widget showMap() {
         mapController: mapController,
         options: MapOptions(
           initialCenter: latLng!,
-          initialZoom: 15.0,
+          initialZoom: 17.0,
         ),
         children: [
           TileLayer(
@@ -403,3 +406,4 @@ Widget showMap() {
     );
   }
 }
+//nul raider phone number
