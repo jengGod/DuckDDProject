@@ -21,13 +21,11 @@ class Statusorder extends StatefulWidget {
 }
 
 class _StatusorderState extends State<Statusorder> {
-  
   final MapController mapController = MapController(); // ควบคุมแผนที่
   bool isLoading = true;
   int selectedIndex = 1;
   String? username;
   String? profilePicture;
-
 
   LatLng? latLng;
   LatLng? latLngSend;
@@ -46,16 +44,24 @@ class _StatusorderState extends State<Statusorder> {
     driverLocation();
     startLocationUpdates();
   }
-  
+
   Future<void> loadUserData() async {
-    if(widget.order['rider'].toString() == null) return; //-----------------
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    try {
-      DocumentSnapshot locationDoc =
-          await firestore.collection('Drivers').doc(widget.order['rider'].toString()).get();
-       username = locationDoc['username'];
-       profilePicture= locationDoc['profile_picture'];
-    } catch (e) {}
+    log('rider:' + widget.order['rider'].toString());
+    if (widget.order['rider'].toString() == null) {
+      return;
+    } else {
+      
+      //-----------------
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      try {
+        DocumentSnapshot locationDoc = await firestore
+            .collection('Drivers')
+            .doc(widget.order['rider'].toString())
+            .get();
+        username = locationDoc['username'];
+        profilePicture = locationDoc['profile_picture'];
+      } catch (e) {}
+    }
   }
 
   Future<void> driverLocation() async {
@@ -86,6 +92,7 @@ class _StatusorderState extends State<Statusorder> {
 
   void startLocationUpdates() {
     // Start updating only if not already updating
+    if (widget.order['rider'].toString == null) return;
     if (!_isUpdatingLocation) {
       _isUpdatingLocation = true;
 
@@ -114,7 +121,6 @@ class _StatusorderState extends State<Statusorder> {
 
   @override
   Widget build(BuildContext context) {
-     
     return Scaffold(
       appBar: AppBar(
         title: const Text('เลือกตำแหน่งบนแผนที่'),
@@ -247,13 +253,15 @@ class _StatusorderState extends State<Statusorder> {
                         Row(
                           children: [
                             Image.asset(
-                                  'assets/image/duck.png',
-                                  width: 20,
-                                  height: 20,
-                                ),
+                              'assets/image/duck.png',
+                              width: 20,
+                              height: 20,
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 20,),
+                        const SizedBox(
+                          height: 20,
+                        ),
                         // Progress indicator
                         // const Padding(
                         //   padding: EdgeInsets.symmetric(vertical: 10),
@@ -264,7 +272,7 @@ class _StatusorderState extends State<Statusorder> {
                         //   ),
                         // ),
                         // Row with driver details
-                         Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Column(
@@ -290,12 +298,13 @@ class _StatusorderState extends State<Statusorder> {
                                       fontSize: 12),
                                 ),
                                 Text(
-                                  username.toString(), // Replace with dynamic license
+                                  username
+                                      .toString(), // Replace with dynamic license
                                   style: TextStyle(fontSize: 12),
                                 ),
                               ],
                             ),
-                             Column(
+                            Column(
                               children: [
                                 const Text(
                                   'LICENSE',
@@ -309,7 +318,7 @@ class _StatusorderState extends State<Statusorder> {
                                 ),
                               ],
                             ),
-                             Column(
+                            Column(
                               children: [
                                 const Text(
                                   'PHONE NUMBER',
