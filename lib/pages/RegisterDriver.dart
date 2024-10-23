@@ -305,7 +305,8 @@ class _RegisterdriverState extends State<Registerdriver> {
       'phonenumber': phoneCtl.text,
       'license': licenseCtl.text,
       'password': hashedPassword,
-      'profile_picture': imageUrl
+      'profile_picture': imageUrl,
+      'onDuty':"ว่างงาน"
     };
 
     db.collection('Drivers').doc(phoneCtl.text).set(data).then((_) {

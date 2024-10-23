@@ -119,6 +119,7 @@ class _userProfileState extends State<userProfile> {
               _showLogoutDialog(context);
             } else {
               setState(() {
+                
                 selectedIndex = index;
                 if (selectedIndex == 0) {
                   Navigator.pushReplacement(

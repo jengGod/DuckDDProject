@@ -139,19 +139,40 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
             if (index == 2) {
               _showLogoutDialog(context); // Handle logout
             } else {
-              setState(() {
+              setState(() async {
                 selectedIndex = index;
+                final FirebaseFirestore firestore = FirebaseFirestore.instance;
+                DocumentSnapshot DriverDoc = await firestore
+                    .collection('Drivers')
+                    .doc(phonenumber)
+                    .get();
+                String duty = DriverDoc['onDuty'];
                 if (selectedIndex == 0) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DriverPage()),
-                  );
+                  if (duty == 'รับงาน') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DriverPage()),
+                    );
+                  }
                 } else if (selectedIndex == 1) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DriverProfile()),
-                  );
+                  if (duty == 'รับงาน') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                    );
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DriverProfile()),
+                    );
+                  }
                 }
               });
             }
@@ -380,7 +401,18 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
               onPressed: () async {
                 // Stop location updates
                 stopLocationUpdates();
-
+                final FirebaseFirestore firestore = FirebaseFirestore.instance;
+                var db = FirebaseFirestore.instance;
+                var job = {'onDuty': "ว่างงาน"};
+                try {
+                  log('Start Order');
+                  db
+                      .collection('Drivers')
+                      .doc(phonenumber.toString())
+                      .set(job, SetOptions(merge: true));
+                } catch (e) {
+                  log(e.toString());
+                }
                 // Navigate to another page after completing the order
                 Navigator.pushReplacement(
                   context,
