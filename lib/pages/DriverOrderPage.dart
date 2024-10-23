@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DriverOrderPage extends StatefulWidget {
   final Map<String, dynamic> order;
-  
 
   const DriverOrderPage({super.key, required this.order});
 
@@ -22,8 +21,8 @@ class DriverOrderPage extends StatefulWidget {
 
 class _DriverOrderPageState extends State<DriverOrderPage> {
   int selectedIndex = 0;
-  double lati=0;
-  double long=0;
+  double lati = 0;
+  double long = 0;
 
   String? username;
   String? email;
@@ -32,7 +31,8 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   String? plate_number;
 
   Timer? locationUpdateTimer;
-
+  bool _isUpdatingLocation = false; // Track whether updates are active
+  Timer? locationTimer;
   @override
   void initState() {
     super.initState();
@@ -41,13 +41,19 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   }
 
   void startLocationUpdates() {
-    locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      await updateDriverLocation();
-    });
+    // Start updating only if not already updating
+    if (!_isUpdatingLocation) {
+      _isUpdatingLocation = true;
+
+      // Start a Timer that updates the location every 5 seconds (for example)
+      locationTimer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+        updateDriverLocation();
+      });
+    }
   }
-  
+
   Future<void> updateDriverLocation() async {
-    if (phonenumber == null) return;
+    if (phonenumber == null || !_isUpdatingLocation) return;
 
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -64,11 +70,12 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
         'location_long': long,
       });
 
-      // Update the LatLng and move the map only if latLng is valid
-      setState(() {
-        log('Updated Location: lati: $lati, long: $long');
-      });
-
+      // Only call setState if the widget is still mounted
+      if (mounted) {
+        setState(() {
+          log('Updated Location: lati: $lati, long: $long');
+        });
+      }
     } catch (e) {
       log('Error updating location: $e');
     }
@@ -85,21 +92,25 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
     });
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     try {
-      DocumentSnapshot locationDoc = await firestore
-          .collection('Driver_location')
-          .doc(phonenumber)
-          .get();
+      DocumentSnapshot locationDoc =
+          await firestore.collection('Driver_location').doc(phonenumber).get();
       lati = locationDoc['location_loti'];
       long = locationDoc['location_long'];
     } catch (e) {}
   }
-  
+
+  @override
+  void dispose() {
+    // Stop location updates when the widget is disposed
+    stopLocationUpdates();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // ดึงข้อมูล order จาก widget.order
-  Map<String, dynamic> order = widget.order;
+    Map<String, dynamic> order = widget.order;
 
- 
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(vertical: 1.0),
@@ -283,7 +294,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Drivermap(order:order),
+                            builder: (context) => Drivermap(order: order),
                           ),
                         );
                       },
@@ -342,8 +353,16 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
     );
   }
 
+  void stopLocationUpdates() {
+    // Cancel the Timer to stop location updates
+    if (locationTimer != null) {
+      locationTimer!.cancel();
+      locationTimer = null;
+    }
+    _isUpdatingLocation = false;
+  }
+
   void completeOrder() {
-    //delete order
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -359,6 +378,10 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
             ),
             TextButton(
               onPressed: () async {
+                // Stop location updates
+                stopLocationUpdates();
+
+                // Navigate to another page after completing the order
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const DriverPage()),
@@ -371,5 +394,4 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
       },
     );
   }
-
 }
