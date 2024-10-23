@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:duckddproject/pages/StatusOrder.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/allShipment.dart';
 import 'package:duckddproject/pages/profile.dart';
@@ -194,7 +195,7 @@ class _PackagelistState extends State<Packagelist> {
                         builder: (context) => const AllshipmentPage()),
               );
             },
-            child: Text('View all shipments'), // Button text
+            child: const Text('View all shipments'), // Button text
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -224,59 +225,100 @@ class _PackagelistState extends State<Packagelist> {
                   return const Center(child: Text('ยังไม่มีการจัดส่ง'));
                 }
 
-                return ListView.builder(
-                  itemCount: filteredList.length,
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> order = filteredList[index];
-
-                    // Display the relevant order details
-                    return Column(
-                      children: [
-                        ListTile(
-                          title:
-                              Text(order['name'] ?? 'No Name'), // Display name
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                  'Description: ${order['descrip'] ?? 'No Description'}'), // Display description
-                              Text(
-                                order['order_status'] == '1'
-                                    ? 'Status: Search for driver'
-                                    : order['order_status'] == '2'
-                                        ? 'Status: Pickup package'
-                                        : order['order_status'] == '3'
-                                            ? 'Status: delivering'
-                                            : order['order_status'] == '4'
-                                                ? 'Status: delivered'
-                                                : 'Status: unknown', // Default text if status is not 1, 2, 3, or 4
+                return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView.builder(
+              itemCount: filteredList.length,
+              itemBuilder: (context, index) {
+                Map<String, dynamic> order = filteredList[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Card(
+                    color: const Color.fromARGB(255, 221, 216, 216),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    elevation: 4,
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Image.network(
+                                        order['pic_1'] ?? '',
+                                        width: 120,
+                                        height: 120,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: Column(
+                                        
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                               const Text(   
+                                          'Status',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                      Text(
+                                          order['order_status'] == '1'
+                                              ? 'Search for driver'
+                                              : order['order_status'] == '2'
+                                                  ? 'Pickup package'
+                                                  : order['order_status'] == '3'
+                                                      ? 'Delivering'
+                                                      : order['order_status'] ==
+                                                              '4'
+                                                          ? 'Delivered'
+                                                          : 'unknown',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                      Text(
+                                          'PackageName: ${order['name'] ?? 'Unknown'}',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                      Text(
+                                          'Description: ${order['descrip'] ?? 'Unknown'}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Color.fromARGB(255, 3, 3, 3),
+                                          )),
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            More(context, order);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.black,
+                                          ),
+                                          child: const Text(
+                                            'More',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              // Check if pic_1 contains a valid URL and display the image
-                              order['pic_1'] != null &&
-                                      order['pic_1'].isNotEmpty
-                                  ? Image.network(
-                                      order[
-                                          'pic_1'], // Image URL from Firestore
-                                      height:
-                                          100, // Adjust the height as needed
-                                      width: 100, // Adjust the width as needed
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const Text(
-                                            'Failed to load image'); // Error handling
-                                      },
-                                    )
-                                  : const Text(
-                                      'No Image'), // Fallback if pic_1 is null or empty
                             ],
                           ),
-                          onTap: () {
-                            // Perform any actions on tapping the ListTile, if necessary
-                          },
                         ),
-                      ],
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -316,4 +358,12 @@ class _PackagelistState extends State<Packagelist> {
   }
 
   send(BuildContext context) {}
+  
+  void More(BuildContext context, Map<String, dynamic> order) {
+    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Statusorder()),
+              );
+  }
 }
