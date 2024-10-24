@@ -76,7 +76,7 @@ class _nameState extends State<AllshipmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('เลือกตำแหน่งบนแผนที่'),
+        title: const Text('การจัดส่งทั้งหมด'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
