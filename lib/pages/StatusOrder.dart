@@ -545,4 +545,3 @@ class _StatusorderState extends State<Statusorder> {
     );
   }
 }
-//nul raider phone number
