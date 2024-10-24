@@ -41,8 +41,12 @@ class _StatusorderState extends State<Statusorder> {
   void initState() {
     super.initState();
     loadUserData();
-    driverLocation();
-    startLocationUpdates();
+    if (widget.order['order_status'] == "4") {
+      stopUpdates();
+    } else {
+      driverLocation();
+      startLocationUpdates();
+    }
   }
 
   Future<void> loadUserData() async {
@@ -148,11 +152,16 @@ class _StatusorderState extends State<Statusorder> {
     }
   }
 
+  void stopUpdates() {
+    locationTimer?.cancel(); // Stop the periodic timer
+    _isUpdatingLocation = false; // Reset the flag
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('เลือกตำแหน่งบนแผนที่'),
+        title: const Text('ติดตามสถานะจัดส่ง'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -241,55 +250,115 @@ class _StatusorderState extends State<Statusorder> {
                           CrossAxisAlignment.center, // Align content to center
                       children: [
                         // Row for the status options
-                        const SingleChildScrollView(
+                        SingleChildScrollView(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Text(
-                                'SEARCH OF DRIVER',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 8,
-                                ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'SEARCH OF DRIVER',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 8,
+                                      color: widget.order['order_status'] == "1"
+                                          ? Colors.orange// สีเมื่อสถานะเป็น 1
+                                          : Colors.black, // สีปกติ
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  if (widget.order['order_status'] == "1") ...[
+                                    Image.asset(
+                                      'assets/image/duck.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ] else ...[
+                                    const SizedBox(height: 20),
+                                  ],
+                                ],
                               ),
-                              Text(
-                                'PICKUP PACKAGE',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 8,
-                                ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'PICKUP PACKAGE',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 8,
+                                      color: widget.order['order_status'] == "2"
+                                          ? Colors.orange
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  if (widget.order['order_status'] == "2") ...[
+                                    Image.asset(
+                                      'assets/image/duck.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ] else ...[
+                                    const SizedBox(height: 20),
+                                  ],
+                                ],
                               ),
-                              Text(
-                                'DELIVERING',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 8,
-                                ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'DELIVERING',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 8,
+                                      color: widget.order['order_status'] == "3"
+                                          ? Colors.orange
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  if (widget.order['order_status'] == "3") ...[
+                                    Image.asset(
+                                      'assets/image/duck.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ] else ...[
+                                    const SizedBox(height: 20),
+                                  ],
+                                ],
                               ),
-                              Text(
-                                'DELIVERED',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 8,
-                                ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'DELIVERED',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 8,
+                                      color: widget.order['order_status'] == "4"
+                                          ? Colors.orange
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  if (widget.order['order_status'] == "4") ...[
+                                    Image.asset(
+                                      'assets/image/duck.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ] else ...[
+                                    const SizedBox(height: 20),
+                                  ],
+                                ],
                               ),
                             ],
                           ),
                         ),
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/image/duck.png',
-                              width: 20,
-                              height: 20,
-                            ),
-                          ],
-                        ),
+
                         const SizedBox(
                           height: 20,
                         ),
                         if (widget.order['rider'] == null ||
-                            widget.order['rider'].toString().isEmpty) ...[
+                            widget.order['rider'].toString().isEmpty||widget.order['order_status']=="4") ...[
                           const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -339,7 +408,7 @@ class _StatusorderState extends State<Statusorder> {
                           )
                         ],
                         if (widget.order['rider'] != null &&
-                            widget.order['rider'].toString().isNotEmpty) ...[
+                            widget.order['rider'].toString().isNotEmpty||widget.order['order_status']=="4") ...[
                           if (profilePicture == null ||
                               profilePicture.toString().isEmpty ||
                               username == null ||
