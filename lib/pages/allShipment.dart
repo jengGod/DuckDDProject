@@ -18,8 +18,6 @@ class _nameState extends State<AllshipmentPage> {
   final MapController mapController = MapController(); // ควบคุมแผนที่
   bool isLoading = true;
 
-  String? username;
-  String? email;
   String? phonenumber;
 
   List<Map<String, dynamic>> usersList = [];
@@ -27,21 +25,19 @@ class _nameState extends State<AllshipmentPage> {
   @override
   void initState() {
     super.initState();
-    fetchOrders();
     loadUserData();
+    fetchOrders();
   }
 
   Future<void> loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username');
-      email = prefs.getString('email');
       phonenumber = prefs.getString('phonenumber');
     });
   }
 
-  Future<void> fetchOrders() async {
-    try {
+  void fetchOrders() async {
+     try {
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('Orders').get();
 
@@ -69,6 +65,11 @@ class _nameState extends State<AllshipmentPage> {
     } catch (e) {
       print('Error fetching orders: $e');
     }
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() {
+      // After fetching, update filteredList with data and stop loading/ Replace with your actual data-fetching logic
+      isLoading = false; // Stop loading
+    });
   }
 
   @override
@@ -86,7 +87,16 @@ class _nameState extends State<AllshipmentPage> {
           },
         ),
       ),
-      body: showMap(), // Use the body property to display the map
+      body: isLoading
+          ? const Center(
+              child:
+                  CircularProgressIndicator(), // Show loading indicator while fetching data
+            )
+          : filteredList.isEmpty
+              ? const Center(
+                  child: Text('No data to display'), // Show message if no data
+                )
+              : showMap(), // Display the map when data is ready
     );
   }
 
@@ -94,7 +104,10 @@ class _nameState extends State<AllshipmentPage> {
   Widget showMap() {
     // Ensure we have valid coordinates
     if (filteredList.isEmpty) {
-      return const Center(child: Text('No data to display'));
+      return const Center(
+        child:
+            CircularProgressIndicator(), // Show a loading indicator while waiting for data
+      );
     }
 
     // Set the initial position to the first order's sender location
@@ -121,7 +134,7 @@ class _nameState extends State<AllshipmentPage> {
         point: receiverPosition, // Receiver's location
         width: 40,
         height: 40,
-        child:  const Icon(
+        child: const Icon(
           Icons.flag, // Red pin for receiver
           color: Colors.green,
           size: 40,
@@ -135,7 +148,7 @@ class _nameState extends State<AllshipmentPage> {
         point: initialPosition, // Sender's initial position
         width: 40,
         height: 40,
-        child:  const Icon(
+        child: const Icon(
           Icons.location_on, // Green flag for sender
           color: Colors.red,
           size: 40,
@@ -150,10 +163,10 @@ class _nameState extends State<AllshipmentPage> {
         mapController: mapController,
         options: MapOptions(
           initialCenter: initialPosition, // Initial map center
-          initialZoom: 15.0, // Initial zoom level
+          initialZoom: 16.0, // Initial zoom level
           onMapReady: () {
             // Move the map to the sender's location after the map is rendered
-            mapController.move(initialPosition, 14.0);
+            mapController.move(initialPosition, 16.0);
           },
         ),
         children: [
