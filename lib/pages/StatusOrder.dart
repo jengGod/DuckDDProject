@@ -262,7 +262,7 @@ class _StatusorderState extends State<Statusorder> {
                                       fontWeight: FontWeight.bold,
                                       fontSize: 8,
                                       color: widget.order['order_status'] == "1"
-                                          ? Colors.orange// สีเมื่อสถานะเป็น 1
+                                          ? Colors.green // สีเมื่อสถานะเป็น 1
                                           : Colors.black, // สีปกติ
                                     ),
                                   ),
@@ -358,7 +358,7 @@ class _StatusorderState extends State<Statusorder> {
                           height: 20,
                         ),
                         if (widget.order['rider'] == null ||
-                            widget.order['rider'].toString().isEmpty||widget.order['order_status']=="4") ...[
+                            widget.order['rider'].toString().isEmpty) ...[
                           const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -407,16 +407,17 @@ class _StatusorderState extends State<Statusorder> {
                             ],
                           )
                         ],
-                        if (widget.order['rider'] != null &&
-                            widget.order['rider'].toString().isNotEmpty||widget.order['order_status']=="4") ...[
+                        if ((widget.order['rider'] != null &&
+                                widget.order['rider'].toString().isNotEmpty) 
+                          ) ...[
                           if (profilePicture == null ||
                               profilePicture.toString().isEmpty ||
                               username == null ||
                               username.toString().isEmpty) ...[
-                            Center(
-                              child:
-                                  CircularProgressIndicator(), // Show loading spinner while data is being loaded
-                            ),
+                            // Center(
+                            //   child:
+                            //       CircularProgressIndicator(), // Show loading spinner while data is being loaded
+                            // ),
                           ] else ...[
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -478,7 +479,7 @@ class _StatusorderState extends State<Statusorder> {
                                 ),
                               ],
                             ),
-                          ],
+                          ]
                         ],
 
                         // Button for checking package picture
