@@ -8,6 +8,7 @@ import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,11 @@ class Statusorder extends StatefulWidget {
 }
 
 class _StatusorderState extends State<Statusorder> {
+  Map<String, dynamic>? orderData;
+  Map<String, dynamic>? orderlocationData;
+
+  StreamSubscription? listener;
+  StreamSubscription? Driverlistener;
   final MapController mapController = MapController(); // ควบคุมแผนที่
   bool isLoading = true;
   int selectedIndex = 1;
@@ -37,10 +43,13 @@ class _StatusorderState extends State<Statusorder> {
   double long = 0;
 
   bool _isUpdatingLocation = false;
+
   @override
   void initState() {
     super.initState();
     loadUserData();
+    startRealtimeGet();
+    startRealtimeGetlocation();
     if (widget.order['order_status'] == "4") {
       stopUpdates();
     } else {
@@ -81,6 +90,7 @@ class _StatusorderState extends State<Statusorder> {
   }
 
   Future<void> driverLocation() async {
+    
     if (widget.order['rider'] == null ||
         widget.order['rider'].toString().isEmpty) {
       log('No rider assigned. Waiting for a driver to accept the order.');
@@ -96,9 +106,9 @@ class _StatusorderState extends State<Statusorder> {
 
       if (data != null) {
         setState(() {
-          lati = data?['location_loti'] ??
+          lati = orderlocationData?['location_loti'] ??
               0.0; // Provide default values if necessary
-          long = data?['location_long'] ?? 0.0;
+          long = orderlocationData?['location_long'] ?? 0.0;
           latLng = LatLng(lati, long);
           log('Driver Location: lati: $lati, long: $long');
         });
@@ -157,6 +167,55 @@ class _StatusorderState extends State<Statusorder> {
     _isUpdatingLocation = false; // Reset the flag
   }
 
+  void startRealtimeGet() {
+    var db = FirebaseFirestore.instance;
+
+    final docRef = db.collection("Orders").doc(widget.order['orderId']);
+    listener = docRef.snapshots().listen(
+      (event) {
+
+        var data = event.data();
+        if (data != null) {
+          setState(() {
+            loadUserData();
+            orderData = data;
+            // เก็บข้อมูลใหม่ในตัวแปร
+          });
+          log("current data: ${event.data()}");
+        } else {
+          log('No data found for the document');
+        }
+      },
+      onError: (error) => log("Listen failed: $error"),
+    );
+
+    // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
+    log('Listener created: $listener');
+  }
+   void startRealtimeGetlocation() {
+    var db = FirebaseFirestore.instance;
+
+    final docRef = db.collection("Driver_location").doc(widget.order['rider']);
+    Driverlistener = docRef.snapshots().listen(
+      (event) {
+        var data = event.data();
+        if (data != null) {
+          setState(() {
+            orderlocationData = data;
+            // เก็บข้อมูลใหม่ในตัวแปร
+          });
+          log("current data: ${event.data()}");
+        } else {
+          log('No data found for the document');
+        }
+      },
+      onError: (error) => log("Listen failed: $error"),
+    );
+
+    // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
+    log('Listener created: $listener');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,6 +224,7 @@ class _StatusorderState extends State<Statusorder> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+            stopRealTimelocation();
             stopLocationUpdates();
             Navigator.pop(
               context,
@@ -261,13 +321,13 @@ class _StatusorderState extends State<Statusorder> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 8,
-                                      color: widget.order['order_status'] == "1"
+                                      color: orderData?['order_status'] == "1"
                                           ? Colors.green // สีเมื่อสถานะเป็น 1
                                           : Colors.black, // สีปกติ
                                     ),
                                   ),
                                   const SizedBox(height: 5),
-                                  if (widget.order['order_status'] == "1") ...[
+                                  if (orderData?['order_status'] == "1") ...[
                                     Image.asset(
                                       'assets/image/duck.png',
                                       width: 20,
@@ -285,13 +345,13 @@ class _StatusorderState extends State<Statusorder> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 8,
-                                      color: widget.order['order_status'] == "2"
+                                      color: orderData?['order_status'] == "2"
                                           ? Colors.orange
                                           : Colors.black,
                                     ),
                                   ),
                                   const SizedBox(height: 5),
-                                  if (widget.order['order_status'] == "2") ...[
+                                  if (orderData?['order_status'] == "2") ...[
                                     Image.asset(
                                       'assets/image/duck.png',
                                       width: 20,
@@ -309,13 +369,13 @@ class _StatusorderState extends State<Statusorder> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 8,
-                                      color: widget.order['order_status'] == "3"
+                                      color: orderData?['order_status'] == "3"
                                           ? Colors.orange
                                           : Colors.black,
                                     ),
                                   ),
                                   const SizedBox(height: 5),
-                                  if (widget.order['order_status'] == "3") ...[
+                                  if (orderData?['order_status'] == "3") ...[
                                     Image.asset(
                                       'assets/image/duck.png',
                                       width: 20,
@@ -333,13 +393,13 @@ class _StatusorderState extends State<Statusorder> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 8,
-                                      color: widget.order['order_status'] == "4"
+                                      color: orderData?['order_status'] == "4"
                                           ? Colors.orange
                                           : Colors.black,
                                     ),
                                   ),
                                   const SizedBox(height: 5),
-                                  if (widget.order['order_status'] == "4") ...[
+                                  if (orderData?['order_status'] == "4") ...[
                                     Image.asset(
                                       'assets/image/duck.png',
                                       width: 20,
@@ -357,8 +417,8 @@ class _StatusorderState extends State<Statusorder> {
                         const SizedBox(
                           height: 20,
                         ),
-                        if (widget.order['rider'] == null ||
-                            widget.order['rider'].toString().isEmpty) ...[
+                        if (orderData?['rider'] == null ||
+                            orderData?['rider'].isEmpty) ...[
                           const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -407,9 +467,8 @@ class _StatusorderState extends State<Statusorder> {
                             ],
                           )
                         ],
-                        if ((widget.order['rider'] != null &&
-                                widget.order['rider'].toString().isNotEmpty) 
-                          ) ...[
+                        if ((orderData?['rider'] != null &&
+                            orderData?['rider'].isNotEmpty)) ...[
                           if (profilePicture == null ||
                               profilePicture.toString().isEmpty ||
                               username == null ||
@@ -458,7 +517,7 @@ class _StatusorderState extends State<Statusorder> {
                                           fontSize: 12),
                                     ),
                                     Text(
-                                      '${widget.order['plate_number'] ?? 'Unknown'}', // Display plate number or fallback to 'Unknown'
+                                      '${orderData?['plate_number'] ?? 'Unknown'}', // Display plate number or fallback to 'Unknown'
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                   ],
@@ -472,7 +531,7 @@ class _StatusorderState extends State<Statusorder> {
                                           fontSize: 12),
                                     ),
                                     Text(
-                                      '${widget.order['rider'] ?? 'Unknown'}', // Display rider's phone number or fallback to 'Unknown'
+                                      '${orderData?['rider'] ?? 'Unknown'}', // Display rider's phone number or fallback to 'Unknown'
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                   ],
@@ -487,7 +546,75 @@ class _StatusorderState extends State<Statusorder> {
                           padding: const EdgeInsets.only(top: 10),
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              // Action to view package picture
+                              // Show a pop-up dialog to view the package picture
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Package Picture'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Check order_status and display the corresponding image
+                                        if (orderData != null)
+                                          if (orderData!['order_status'] == "1" ||
+                                              orderData!['order_status'] == "2")
+                                            // Show pic_1 for status 1 or 2
+                                            orderData?['pic_1'] != null &&
+                                                    orderData?['pic_1']
+                                                        .isNotEmpty
+                                                ? Image.network(
+                                                    orderData?['pic_1'],
+                                                    fit: BoxFit.cover,
+                                                    height: 150,
+                                                    width: double.infinity,
+                                                  )
+                                                : const Text(
+                                                    'No image available for pic_1.')
+                                          else if (orderData!['order_status'] == "3")
+                                            // Show pic_2 for status 3
+                                            orderData?['pic_2'] != null &&
+                                                    orderData?['pic_2']
+                                                        .isNotEmpty
+                                                ? Image.network(
+                                                    orderData?['pic_2'],
+                                                    fit: BoxFit.cover,
+                                                    height: 150,
+                                                    width: double.infinity,
+                                                  )
+                                                : const Text(
+                                                    'No image available for pic_2.')
+                                          else if (orderData!['order_status'] == "4")
+                                            // Show pic_3 for status 4
+                                            orderData?['pic_3'] != null &&
+                                                    orderData?['pic_3']
+                                                        .isNotEmpty
+                                                ? Image.network(
+                                                    orderData?['pic_3'],
+                                                    fit: BoxFit.cover,
+                                                    height: 150,
+                                                    width: double.infinity,
+                                                  )
+                                                : const Text(
+                                                    'No image available for pic_3.'),
+                                        const SizedBox(height: 10),
+                                         Text(
+                                          orderData?['descrip'], // Adjust as needed
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        },
+                                        child: const Text('Close'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                             icon: const Icon(Icons.camera_alt),
                             label: const Text('CHECK PACKAGE PICTURE'),
@@ -496,6 +623,15 @@ class _StatusorderState extends State<Statusorder> {
                             ),
                           ),
                         ),
+
+                        SizedBox(
+                          height: 5,
+                        ),
+                        FilledButton(
+                            onPressed: stopRealTime,
+                            child: const Text('Stop Real-time Get')),
+
+                        // Button text
                       ],
                     ),
                   ),
@@ -506,6 +642,17 @@ class _StatusorderState extends State<Statusorder> {
         ),
       ),
     );
+  }
+
+  void stopRealTime() {
+    if (listener != null) {
+      listener!.cancel();
+    }
+  }
+   void stopRealTimelocation() {
+    if (Driverlistener != null) {
+      Driverlistener!.cancel();
+    }
   }
 
   @override
