@@ -45,6 +45,29 @@ class _DrivermapState extends State<Drivermap> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     phonenumber = prefs.getString('phonenumber');
     await updateDriverLocation(); // Update location on load
+
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // ตรวจสอบว่าบริการ GPS เปิดอยู่หรือไม่
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
   }
 
   Future<void> updateDriverLocation() async {
