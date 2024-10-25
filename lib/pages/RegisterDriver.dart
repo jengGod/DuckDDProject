@@ -26,6 +26,8 @@ TextEditingController licenseCtl = TextEditingController();
 bool _isButtonPressed = false;
 XFile? image; // สำหรับการจัดการรูปภาพที่เลือก
 String imageUrl = '';
+bool ispassCtl = false;
+bool ispasswordCtl = false;
 class _RegisterdriverState extends State<Registerdriver> {
   final ImagePicker picker = ImagePicker();
 
@@ -57,8 +59,17 @@ class _RegisterdriverState extends State<Registerdriver> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register Driver'),
+        title: Text('Register Driver'),
         backgroundColor: Colors.yellow,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            );
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -66,21 +77,20 @@ class _RegisterdriverState extends State<Registerdriver> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-               if (image != null)
+              if (image != null)
                 ClipOval(
                   child: Container(
                     height: 100,
-                    width: 100, 
+                    width: 100,
                     color: Colors.grey[300],
                     child: Image.file(
                       File(image!.path),
                       fit: BoxFit.cover,
-                      width: 150, 
-                      height: 150, 
+                      width: 150,
+                      height: 150,
                     ),
                   ),
                 ),
-
               const SizedBox(height: 20),
               FilledButton(
                   onPressed: () async {
@@ -147,6 +157,7 @@ class _RegisterdriverState extends State<Registerdriver> {
               const SizedBox(height: 20),
               TextField(
                 controller: phoneCtl,
+                
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
@@ -182,36 +193,56 @@ class _RegisterdriverState extends State<Registerdriver> {
               const SizedBox(height: 20),
               TextField(
                 controller: passwordCtl,
-                obscureText: true,
+                obscureText: !ispasswordCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')), // ห้ามพิมพ์ spacebar
                 ],
-                decoration: const InputDecoration(
+                decoration:  InputDecoration(
                   labelText: 'Password',
                   filled: true,
                   fillColor: Color(0xFFF0ECF6),
-                  border: OutlineInputBorder(
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(30.0)),
                     borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      ispasswordCtl ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        ispasswordCtl = !ispasswordCtl;
+                      });
+                    },
                   ),
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: passCtl,
-                obscureText: true,
+               obscureText: !ispassCtl,
                 inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')), // ห้ามพิมพ์ spacebar
                 ],
-                decoration: const InputDecoration(
+                decoration:  InputDecoration(
                   labelText: 'Confirm Password',
                   filled: true,
                   fillColor: Color(0xFFF0ECF6),
-                  border: OutlineInputBorder(
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(30.0)),
                     borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      ispassCtl ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        ispassCtl = !ispassCtl;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -306,7 +337,7 @@ class _RegisterdriverState extends State<Registerdriver> {
       'license': licenseCtl.text,
       'password': hashedPassword,
       'profile_picture': imageUrl,
-      'onDuty':"ว่างงาน"
+      'onDuty': "ว่างงาน"
     };
 
     db.collection('Drivers').doc(phoneCtl.text).set(data).then((_) {
