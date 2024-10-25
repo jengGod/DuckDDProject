@@ -23,6 +23,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool ispassCtl = false;
   TextEditingController phoneCtl = TextEditingController();
   TextEditingController passCtl = TextEditingController();
   bool isLoggingIn = false;
@@ -131,20 +132,32 @@ class _LoginPageState extends State<LoginPage> {
                                   const SizedBox(height: 10),
                                   TextField(
                                     controller: passCtl,
-                                    decoration: const InputDecoration(
+                                    obscureText: !ispassCtl,
+                                    decoration: InputDecoration(
                                       filled: true,
                                       labelText: 'Password',
                                       labelStyle:
-                                          TextStyle(color: Colors.black),
+                                          const TextStyle(color: Colors.black),
                                       fillColor: Color(0xFFF0ECF6),
-                                      border: OutlineInputBorder(
+                                      border: const OutlineInputBorder(
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(10.0)),
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          ispassCtl
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            ispassCtl = !ispassCtl;
+                                          });
+                                        },
                                       ),
                                       contentPadding: EdgeInsets.symmetric(
                                           horizontal: 20.0, vertical: 16.0),
                                     ),
-                                    obscureText: true,
                                   ),
                                   const SizedBox(height: 20),
                                   Row(
@@ -290,9 +303,9 @@ class _LoginPageState extends State<LoginPage> {
                 .collection('Shipping')
                 .doc(driverData['phonenumber'].toString())
                 .get();
-            
+
             if (shipDoc.exists) {
-              log('orderId:'+shipDoc['orderId']);
+              log('orderId:' + shipDoc['orderId']);
               DocumentSnapshot orderDoc = await firestore
                   .collection('Orders')
                   .doc(shipDoc['orderId'].toString())

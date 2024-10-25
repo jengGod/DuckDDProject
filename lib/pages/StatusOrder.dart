@@ -224,6 +224,7 @@ class _StatusorderState extends State<Statusorder> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+            stopRealTime();
             stopRealTimelocation();
             stopLocationUpdates();
             Navigator.pop(
@@ -624,14 +625,8 @@ class _StatusorderState extends State<Statusorder> {
                           ),
                         ),
 
-                        SizedBox(
-                          height: 5,
-                        ),
-                        FilledButton(
-                            onPressed: stopRealTime,
-                            child: const Text('Stop Real-time Get')),
-
-                        // Button text
+                      
+                       
                       ],
                     ),
                   ),
