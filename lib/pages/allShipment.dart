@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -15,20 +17,28 @@ class AllshipmentPage extends StatefulWidget {
 }
 
 class _nameState extends State<AllshipmentPage> {
-  final MapController mapController = MapController(); // ควบคุมแผนที่
+  final MapController mapController = MapController(); // Control the map
   bool isLoading = true;
-
+  var db = FirebaseFirestore.instance;
   String? username;
   String? email;
   String? phonenumber;
-
+  List<StreamSubscription<DocumentSnapshot>> listeners = [];
   List<Map<String, dynamic>> usersList = [];
   List<Map<String, dynamic>> filteredList = [];
+  List<Marker> markersDriver = [];
+  StreamSubscription? listener;
   @override
   void initState() {
     super.initState();
     fetchOrders();
     loadUserData();
+  }
+
+  @override
+  void dispose() {
+    stopRealTime();
+    super.dispose();
   }
 
   Future<void> loadUserData() async {
@@ -42,8 +52,7 @@ class _nameState extends State<AllshipmentPage> {
 
   Future<void> fetchOrders() async {
     try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('Orders').get();
+      QuerySnapshot querySnapshot = await db.collection('Orders').get();
 
       // Loop through documents and add to the usersList
       setState(() {
@@ -57,17 +66,128 @@ class _nameState extends State<AllshipmentPage> {
               phonenumber; // Match the sender with the user's phone number
         }).toList();
       });
+
       for (var order in filteredList) {
         log('s_location_lat: ${order['s_location_lat']}');
         log('s_location_lng: ${order['s_location_lng']}');
         log('r_location_lat: ${order['r_location_lat']}');
         log('r_location_lng: ${order['r_location_lng']}');
+        log('driver: ${order['rider']}');
       }
+
       if (filteredList.isEmpty) {
         print('No matching orders found');
+      } else {
+        setupDriverListeners();
       }
     } catch (e) {
       print('Error fetching orders: $e');
+    }
+    // ฟังก์ชันนี้อยู่ในลูป fetchOrders
+filteredList.forEach((order) {
+  final docRef = db.collection("Driver_location").doc(order['rider'].toString());
+
+  // ฟังการอัพเดทตำแหน่งของ driver
+  listener = docRef.snapshots().listen(
+    (event) {
+      if (event.exists) {
+        var data = event.data();
+        log("Current driver data: ${event.data()}");
+
+        if (data != null && data['location_lat'] != null && data['location_long'] != null) {
+          try {
+            // ดึงตำแหน่งของ driver
+            LatLng driverPosition = LatLng(
+              double.parse(data['location_lat'].toString()),
+              double.parse(data['location_long'].toString()),
+            );
+
+            setState(() {
+              // เพิ่ม marker ของ driver
+              markersDriver.removeWhere((marker) => marker.point == driverPosition);
+              markersDriver.add(Marker(
+                point: driverPosition, // ตำแหน่งของ driver
+                width: 40,
+                height: 40,
+                child: const Icon(
+                  Icons.flag, // ไอคอนสำหรับ driver
+                  color: Colors.yellow,
+                  size: 40,
+                ),
+              ));
+            });
+          } catch (e) {
+            log("Error parsing driver location: $e");
+          }
+        } else {
+          log("Driver location fields are null");
+        }
+      } else {
+        log("Driver document does not exist");
+      }
+    },
+    onError: (error) => log("Listen failed: $error"),
+  );
+});
+
+  }
+
+  Future<void> setupDriverListeners() async {
+    for (var order in filteredList) {
+      final docRef =
+          db.collection("Driver_location").doc(order['rider'].toString());
+
+      // Listen to the driver's location updates
+      final listener = docRef.snapshots().listen(
+        (event) {
+          if (event.exists) {
+            var data = event.data();
+            log("Current driver location data: $data");
+
+            if (data != null) {
+              // Check if the location fields are present and valid
+              if (data['location_lat'] != null &&
+                  data['location_long'] != null) {
+                try {
+                  // Get the driver's location
+                  setState(() {
+                    LatLng driverPosition = LatLng(
+                      double.parse(data['location_lat'].toString()),
+                      double.parse(data['location_long'].toString()),
+                    );
+                    
+                    // Clear previous markers for this driver and add updated driver marker
+                    markersDriver.removeWhere(
+                        (marker) => marker.point == driverPosition);
+                    markersDriver.add(Marker(
+                      point: driverPosition, // Driver's location
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.flag, // Flag icon for driver
+                        color: Colors.yellow,
+                        size: 40,
+                      ),
+                    ));
+                    log("Driver marker updated at: $driverPosition");
+                  });
+                } catch (e) {
+                  log("Error parsing driver location: $e");
+                }
+              } else {
+                log("Driver location fields are null");
+              }
+            } else {
+              log("Driver data is null");
+            }
+          } else {
+            log("Driver document does not exist");
+          }
+        },
+        onError: (error) => log("Listen failed: $error"),
+      );
+
+      listeners.add(listener); // Add listener to the list
     }
   }
 
@@ -79,6 +199,7 @@ class _nameState extends State<AllshipmentPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+            stopRealTime();
             Navigator.pop(
               context,
               MaterialPageRoute(builder: (context) => const Packagelist()),
@@ -121,7 +242,7 @@ class _nameState extends State<AllshipmentPage> {
         point: receiverPosition, // Receiver's location
         width: 40,
         height: 40,
-        child:  const Icon(
+        child: const Icon(
           Icons.flag, // Red pin for receiver
           color: Colors.green,
           size: 40,
@@ -135,13 +256,16 @@ class _nameState extends State<AllshipmentPage> {
         point: initialPosition, // Sender's initial position
         width: 40,
         height: 40,
-        child:  const Icon(
+        child: const Icon(
           Icons.location_on, // Green flag for sender
           color: Colors.red,
           size: 40,
         ),
       ),
     );
+
+    // Combine all markers
+    markers.addAll(markersDriver); // Include driver markers
 
     return SizedBox(
       width: 400, // Set the desired width
@@ -163,10 +287,20 @@ class _nameState extends State<AllshipmentPage> {
             maxNativeZoom: 19,
           ),
           MarkerLayer(
-            markers: markers, // Add all the markers to the map
+            markers: [...markers, ...markersDriver], // Combine all markers to display
+            
           ),
         ],
       ),
     );
   }
+
+  void stopRealTime() {
+    for (var listener in listeners) {
+      listener.cancel(); // Cancel each listener
+    }
+    listeners.clear(); // Clear the listener list
+  }
+
+  
 }
