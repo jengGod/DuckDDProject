@@ -593,6 +593,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                 } catch (e) {
                   log(e.toString());
                 }
+                stopcheckChange();
                 // Navigate to another page after completing the order
                 Navigator.pushReplacement(
                   context,
