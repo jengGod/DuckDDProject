@@ -4,46 +4,40 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
 import 'package:duckddproject/pages/UserHome.dart';
+import 'package:duckddproject/pages/checkrecivemore.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class Statusorder extends StatefulWidget {
+class Receiverstatus extends StatefulWidget {
   final Map<String, dynamic> order;
-
-  const Statusorder({Key? key, required this.order}) : super(key: key);
+  const Receiverstatus({Key? key, required this.order}) : super(key: key);
 
   @override
-  State<Statusorder> createState() => _StatusorderState();
+  State<Receiverstatus> createState() => _ReceiverstatusState();
 }
 
-class _StatusorderState extends State<Statusorder> {
-  Map<String, dynamic>? orderData;
-  Map<String, dynamic>? orderlocationData;
-
-  StreamSubscription? listener;
-
-  final MapController mapController = MapController(); // ควบคุมแผนที่
-  bool isLoading = true;
+class _ReceiverstatusState extends State<Receiverstatus> {
   int selectedIndex = 1;
+
   String? username;
   String? profilePicture;
+  StreamSubscription? listener;
 
+  Map<String, dynamic>? orderData;
+  Map<String, dynamic>? orderlocationData;
+  Timer? locationUpdateTimer;
+  Timer? locationTimer;
+  bool _isUpdatingLocation = false;
+
+  final MapController mapController = MapController();
+  double lati = 0;
+  double long = 0;
   LatLng? latLng;
   LatLng? latLngSend;
   LatLng? latLngReceiver;
-  Timer? locationUpdateTimer;
-  Timer? locationTimer;
-
-  double lati = 0;
-  double long = 0;
-
-  bool _isUpdatingLocation = false;
-
   @override
   void initState() {
     super.initState();
@@ -51,40 +45,9 @@ class _StatusorderState extends State<Statusorder> {
     startRealtimeGet();
     if (widget.order['order_status'] == "4") {
       stopUpdates();
-    } else {
+    }else {
       driverLocation();
       startLocationUpdates();
-    }
-  }
-
-  Future<void> loadUserData() async {
-    if (widget.order['rider'] == null ||
-        widget.order['rider'].toString().isEmpty) {
-      // Assign default values when there is no rider
-      username = "รอพนักงานรับงาน";
-      profilePicture = null; // Or provide a default image path if you have one
-      return;
-    }
-
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    try {
-      DocumentSnapshot locationDoc = await firestore
-          .collection('Drivers')
-          .doc(widget.order['rider'].toString())
-          .get();
-
-      if (locationDoc.exists) {
-        username = locationDoc['username'];
-        profilePicture = locationDoc['profile_picture'];
-      } else {
-        // If the document doesn't exist, assign default values
-        username = "รอพนักงานรับงาน";
-        profilePicture = null;
-      }
-    } catch (e) {
-      // Handle errors by setting default values
-      username = "รอพนักงานรับงาน";
-      profilePicture = null;
     }
   }
 
@@ -129,6 +92,37 @@ class _StatusorderState extends State<Statusorder> {
     }
   }
 
+  Future<void> loadUserData() async {
+    if (widget.order['rider'] == null ||
+        widget.order['rider'].toString().isEmpty) {
+      // Assign default values when there is no rider
+      username = "รอพนักงานรับงาน";
+      profilePicture = null; // Or provide a default image path if you have one
+      return;
+    }
+
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      DocumentSnapshot locationDoc = await firestore
+          .collection('Drivers')
+          .doc(widget.order['rider'].toString())
+          .get();
+
+      if (locationDoc.exists) {
+        username = locationDoc['username'];
+        profilePicture = locationDoc['profile_picture'];
+      } else {
+        // If the document doesn't exist, assign default values
+        username = "รอพนักงานรับงาน";
+        profilePicture = null;
+      }
+    } catch (e) {
+      // Handle errors by setting default values
+      username = "รอพนักงานรับงาน";
+      profilePicture = null;
+    }
+  }
+
   void startLocationUpdates() {
     // Check if rider exists before starting location updates
     if (widget.order['rider'] == null ||
@@ -148,31 +142,15 @@ class _StatusorderState extends State<Statusorder> {
     }
   }
 
-  @override
-  void dispose() {
-    stopLocationUpdates(); // Ensure location updates stop
-    super.dispose();
-  }
-
-  void stopLocationUpdates() {
-    if (_isUpdatingLocation && locationTimer != null) {
-      locationTimer?.cancel(); // Stop the periodic timer
-      _isUpdatingLocation = false; // Reset the flag
-    }
-  }
-
-  void stopUpdates() {
-    locationTimer?.cancel(); // Stop the periodic timer
-    _isUpdatingLocation = false; // Reset the flag
-  }
 
   void startRealtimeGet() {
     var db = FirebaseFirestore.instance;
 
-    final docRef = db.collection("Orders").doc(widget.order['orderId']);
+    final docRef =
+        db.collection("Orders").doc(widget.order['orderId'].toString());
+    log('orderId' + widget.order['orderId']);
     listener = docRef.snapshots().listen(
       (event) {
-
         var data = event.data();
         if (data != null) {
           setState(() {
@@ -187,24 +165,26 @@ class _StatusorderState extends State<Statusorder> {
       },
       onError: (error) => log("Listen failed: $error"),
     );
-
-    // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
-    log('Listener created: $listener');
   }
-  
+
+  void stopUpdates() {
+    locationTimer?.cancel(); // Stop the periodic timer
+    _isUpdatingLocation = false; // Reset the flag
+  }
+
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> order = widget.order;
     return Scaffold(
       appBar: AppBar(
         title: const Text('ติดตามสถานะจัดส่ง'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            stopRealTime();
-            stopLocationUpdates();
+            stopUpdates();
             Navigator.pop(
               context,
-              MaterialPageRoute(builder: (context) => const Packagelist()),
+              MaterialPageRoute(builder: (context) => Checkmore(order: order)),
             );
           },
         ),
@@ -533,7 +513,8 @@ class _StatusorderState extends State<Statusorder> {
                                       children: [
                                         // Check order_status and display the corresponding image
                                         if (orderData != null)
-                                          if (orderData!['order_status'] == "1" ||
+                                          if (orderData!['order_status'] ==
+                                                  "1" ||
                                               orderData!['order_status'] == "2")
                                             // Show pic_1 for status 1 or 2
                                             orderData?['pic_1'] != null &&
@@ -547,7 +528,8 @@ class _StatusorderState extends State<Statusorder> {
                                                   )
                                                 : const Text(
                                                     'No image available for pic_1.')
-                                          else if (orderData!['order_status'] == "3")
+                                          else if (orderData!['order_status'] ==
+                                              "3")
                                             // Show pic_2 for status 3
                                             orderData?['pic_2'] != null &&
                                                     orderData?['pic_2']
@@ -560,7 +542,8 @@ class _StatusorderState extends State<Statusorder> {
                                                   )
                                                 : const Text(
                                                     'No image available for pic_2.')
-                                          else if (orderData!['order_status'] == "4")
+                                          else if (orderData!['order_status'] ==
+                                              "4")
                                             // Show pic_3 for status 4
                                             orderData?['pic_3'] != null &&
                                                     orderData?['pic_3']
@@ -574,8 +557,9 @@ class _StatusorderState extends State<Statusorder> {
                                                 : const Text(
                                                     'No image available for pic_3.'),
                                         const SizedBox(height: 10),
-                                         Text(
-                                          orderData?['descrip'], // Adjust as needed
+                                        Text(
+                                          orderData?[
+                                              'descrip'], // Adjust as needed
                                         ),
                                       ],
                                     ),
@@ -599,7 +583,12 @@ class _StatusorderState extends State<Statusorder> {
                             ),
                           ),
                         ),
-                       
+
+                        SizedBox(
+                          height: 5,
+                        ),
+
+                        // Button text
                       ],
                     ),
                   ),
@@ -610,12 +599,6 @@ class _StatusorderState extends State<Statusorder> {
         ),
       ),
     );
-  }
-
-  void stopRealTime() {
-    if (listener != null) {
-      listener!.cancel();
-    }
   }
 
   @override
@@ -632,10 +615,9 @@ class _StatusorderState extends State<Statusorder> {
     // Fallback to a default location if latLng is null
     LatLng initialCenter = latLng ??
         LatLng(
-          widget.order['s_location_lat'],
-          widget.order['s_location_lng'],
-        ); // Default to coordinates (0, 0)
-
+          widget.order['r_location_lat'],
+          widget.order['r_location_lng'],
+        );
     return SizedBox(
       width: 400,
       height: 500,
@@ -725,4 +707,3 @@ class _StatusorderState extends State<Statusorder> {
     );
   }
 }
-//nul raider phone number

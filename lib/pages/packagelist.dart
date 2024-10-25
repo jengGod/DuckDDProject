@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +24,7 @@ class Packagelist extends StatefulWidget {
 }
 
 class _PackagelistState extends State<Packagelist> {
+  StreamSubscription? listener;
   int selectedIndex = 1;
   LatLng? latLng;
   String? username;
@@ -197,8 +200,11 @@ class _PackagelistState extends State<Packagelist> {
                     builder: (context) => const AllshipmentPage()),
               );
             },
+            
             child: const Text('View all shipments'), // Button text
           ),
+           
+          
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:
@@ -356,7 +362,28 @@ class _PackagelistState extends State<Packagelist> {
       },
     );
   }
+  void startRealtimeGet() {
+    var db = FirebaseFirestore.instance;
+    
+    final docRef = db.collection("Driver_location").doc("11");
+    listener = docRef.snapshots().listen(
+      (event) {
+        var data = event.data();
+        Get.snackbar(data!['location_long'].toString(), data['location_loti'].toString());
+        log("current data: ${event.data()}");
+        setState(() {
+          log('seeeex');
+        });
+      },
+      onError: (error) => log("Listen failed: $error"),
+    );
+  }
 
+  void stopRealTime() {
+    if(listener != null){
+      listener!.cancel();
+    }
+  }
   send(BuildContext context) {}
 
   void More(BuildContext context, Map<String, dynamic> order) {
