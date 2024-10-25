@@ -624,8 +624,6 @@ class _StatusorderState extends State<Statusorder> {
                             ),
                           ),
                         ),
-
-                      
                        
                       ],
                     ),
