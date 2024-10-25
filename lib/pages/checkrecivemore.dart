@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:duckddproject/pages/LoginPage.dart';
+import 'package:duckddproject/pages/ReceiverStatus.dart';
 import 'package:duckddproject/pages/UserHome.dart';
 import 'package:duckddproject/pages/packagelist.dart';
 import 'package:duckddproject/pages/profile.dart';
@@ -132,7 +134,7 @@ class _CheckmoreState extends State<Checkmore> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: () => checkstatus(context),
+                    onPressed: () => checkstatus(context,order),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(
@@ -236,11 +238,11 @@ class _CheckmoreState extends State<Checkmore> {
     );
   }
 
-  void checkstatus(BuildContext context) {
+  void checkstatus(BuildContext context,Map<String, dynamic> order) {
     // Add status-checking logic here, if any.
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const Packagelist()),
+      MaterialPageRoute(builder: (context) => Receiverstatus(order:order)),
     );
   }
 }
