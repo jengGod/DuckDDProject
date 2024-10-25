@@ -359,13 +359,14 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
 
                           const SizedBox(height: 2),
 
-// Delivered camera button
+                          // Delivered camera button
                           Padding(
+                            //pic3
                             padding: const EdgeInsets.all(5.0),
                             child: Column(
                               children: [
                                 const Text(
-                                  'DELIVERING',
+                                  'DELIVERED',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -404,8 +405,8 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                                 image3 = await picker.pickImage(
                                                     source: ImageSource.camera);
                                                 if (image3 != null) {
-                                                  log('image path: ${image2!.path}');
-                                                  imageUrl3 = await uploadImage(
+                                                  log('image path: ${image3!.path}');
+                                                  imageUrl3 = await uploadImgderivered(
                                                       image3!);
                                                   setState(
                                                       () {}); // Update UI after new image is captured
@@ -415,7 +416,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                                 child: Image.file(
-                                                  File(image2!.path),
+                                                  File(image3!.path),
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
@@ -432,7 +433,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                                     source: ImageSource.camera);
                                                 if (image3 != null) {
                                                   log('image path: ${image3!.path}');
-                                                  imageUrl3 = await uploadImage(
+                                                  imageUrl3 = await uploadImgderivered(
                                                       image3!);
                                                   setState(
                                                       () {}); // Update UI after image is captured
@@ -656,7 +657,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
     }
     return downloadURL;
   }
-  
+
   void checkChange() {
     var db = FirebaseFirestore.instance;
 
