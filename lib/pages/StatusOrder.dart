@@ -26,7 +26,7 @@ class _StatusorderState extends State<Statusorder> {
   Map<String, dynamic>? orderlocationData;
 
   StreamSubscription? listener;
-  StreamSubscription? Driverlistener;
+
   final MapController mapController = MapController(); // ควบคุมแผนที่
   bool isLoading = true;
   int selectedIndex = 1;
@@ -49,7 +49,6 @@ class _StatusorderState extends State<Statusorder> {
     super.initState();
     loadUserData();
     startRealtimeGet();
-    startRealtimeGetlocation();
     if (widget.order['order_status'] == "4") {
       stopUpdates();
     } else {
@@ -106,9 +105,9 @@ class _StatusorderState extends State<Statusorder> {
 
       if (data != null) {
         setState(() {
-          lati = orderlocationData?['location_loti'] ??
+          lati = data['location_loti'] ??
               0.0; // Provide default values if necessary
-          long = orderlocationData?['location_long'] ?? 0.0;
+          long = data['location_long'] ?? 0.0;
           latLng = LatLng(lati, long);
           log('Driver Location: lati: $lati, long: $long');
         });
@@ -192,30 +191,7 @@ class _StatusorderState extends State<Statusorder> {
     // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
     log('Listener created: $listener');
   }
-   void startRealtimeGetlocation() {
-    var db = FirebaseFirestore.instance;
-
-    final docRef = db.collection("Driver_location").doc(widget.order['rider']);
-    Driverlistener = docRef.snapshots().listen(
-      (event) {
-        var data = event.data();
-        if (data != null) {
-          setState(() {
-            orderlocationData = data;
-            // เก็บข้อมูลใหม่ในตัวแปร
-          });
-          log("current data: ${event.data()}");
-        } else {
-          log('No data found for the document');
-        }
-      },
-      onError: (error) => log("Listen failed: $error"),
-    );
-
-    // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
-    log('Listener created: $listener');
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,7 +201,6 @@ class _StatusorderState extends State<Statusorder> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             stopRealTime();
-            stopRealTimelocation();
             stopLocationUpdates();
             Navigator.pop(
               context,
@@ -642,11 +617,6 @@ class _StatusorderState extends State<Statusorder> {
   void stopRealTime() {
     if (listener != null) {
       listener!.cancel();
-    }
-  }
-   void stopRealTimelocation() {
-    if (Driverlistener != null) {
-      Driverlistener!.cancel();
     }
   }
 
