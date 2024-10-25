@@ -89,7 +89,6 @@ class _StatusorderState extends State<Statusorder> {
   }
 
   Future<void> driverLocation() async {
-    
     if (widget.order['rider'] == null ||
         widget.order['rider'].toString().isEmpty) {
       log('No rider assigned. Waiting for a driver to accept the order.');
@@ -172,7 +171,6 @@ class _StatusorderState extends State<Statusorder> {
     final docRef = db.collection("Orders").doc(widget.order['orderId']);
     listener = docRef.snapshots().listen(
       (event) {
-
         var data = event.data();
         if (data != null) {
           setState(() {
@@ -191,7 +189,7 @@ class _StatusorderState extends State<Statusorder> {
     // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
     log('Listener created: $listener');
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -517,7 +515,6 @@ class _StatusorderState extends State<Statusorder> {
                           ]
                         ],
 
-                        // Button for checking package picture
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
                           child: ElevatedButton.icon(
@@ -529,54 +526,67 @@ class _StatusorderState extends State<Statusorder> {
                                   return AlertDialog(
                                     title: Text('Package Picture'),
                                     content: Column(
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisSize: MainAxisSize
+                                          .min, // Let the column take minimum space
                                       children: [
                                         // Check order_status and display the corresponding image
                                         if (orderData != null)
-                                          if (orderData!['order_status'] == "1" ||
+                                          if (orderData!['order_status'] ==
+                                                  "1" ||
                                               orderData!['order_status'] == "2")
                                             // Show pic_1 for status 1 or 2
                                             orderData?['pic_1'] != null &&
                                                     orderData?['pic_1']
                                                         .isNotEmpty
-                                                ? Image.network(
-                                                    orderData?['pic_1'],
-                                                    fit: BoxFit.cover,
+                                                ? SizedBox(
+                                                    // Wrap the image in SizedBox for proper layout
                                                     height: 150,
                                                     width: double.infinity,
+                                                    child: Image.network(
+                                                      orderData?['pic_1'],
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : const Text(
                                                     'No image available for pic_1.')
-                                          else if (orderData!['order_status'] == "3")
+                                          else if (orderData!['order_status'] ==
+                                              "3")
                                             // Show pic_2 for status 3
                                             orderData?['pic_2'] != null &&
                                                     orderData?['pic_2']
                                                         .isNotEmpty
-                                                ? Image.network(
-                                                    orderData?['pic_2'],
-                                                    fit: BoxFit.cover,
+                                                ? SizedBox(
+                                                    // Wrap the image in SizedBox for proper layout
                                                     height: 150,
                                                     width: double.infinity,
+                                                    child: Image.network(
+                                                      orderData?['pic_2'],
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : const Text(
                                                     'No image available for pic_2.')
-                                          else if (orderData!['order_status'] == "4")
+                                          else if (orderData!['order_status'] ==
+                                              "4")
                                             // Show pic_3 for status 4
                                             orderData?['pic_3'] != null &&
                                                     orderData?['pic_3']
                                                         .isNotEmpty
-                                                ? Image.network(
-                                                    orderData?['pic_3'],
-                                                    fit: BoxFit.cover,
+                                                ? SizedBox(
+                                                    // Wrap the image in SizedBox for proper layout
                                                     height: 150,
                                                     width: double.infinity,
+                                                    child: Image.network(
+                                                      orderData?['pic_3'],
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : const Text(
                                                     'No image available for pic_3.'),
                                         const SizedBox(height: 10),
-                                         Text(
-                                          orderData?['descrip'], // Adjust as needed
-                                        ),
+                                        if (orderData != null &&
+                                            orderData?['descrip'] != null)
+                                          Text(orderData?['descrip']),
                                       ],
                                     ),
                                     actions: [
@@ -599,7 +609,6 @@ class _StatusorderState extends State<Statusorder> {
                             ),
                           ),
                         ),
-                       
                       ],
                     ),
                   ),
