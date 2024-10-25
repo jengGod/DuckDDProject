@@ -28,7 +28,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   int selectedIndex = 0;
   double lati = 0;
   double long = 0;
-
+  StreamSubscription? listener;
   String? username;
   String? email;
   String? phonenumber;
@@ -39,7 +39,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   final ImagePicker picker = ImagePicker();
   String imageUrl2 = '';
   String imageUrl3 = '';
-
+  Map<String, dynamic>? orderData;
   Timer? locationUpdateTimer;
   bool _isUpdatingLocation = false; // Track whether updates are active
   Timer? locationTimer;
@@ -47,6 +47,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
   void initState() {
     super.initState();
     loadUserData();
+    checkChange();
     startLocationUpdates();
   }
 
@@ -146,48 +147,55 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
               const Color.fromARGB(255, 110, 112, 110), // Selected item color
           unselectedItemColor: Colors.black, // Unselected item color
           onTap: (int index) {
-            setState(() async {
-              selectedIndex = index;
-              final FirebaseFirestore firestore = FirebaseFirestore.instance;
-              DocumentSnapshot DriverDoc =
-                  await firestore.collection('Drivers').doc(phonenumber).get();
-              String duty = DriverDoc['onDuty'];
-              if (selectedIndex == 0) {
-                if (duty == 'รับงาน') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
-                  );
-                } else {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DriverPage()),
-                  );
+            if (mounted) {
+              setState(() async {
+                selectedIndex = index;
+                final FirebaseFirestore firestore = FirebaseFirestore.instance;
+                DocumentSnapshot DriverDoc = await firestore
+                    .collection('Drivers')
+                    .doc(phonenumber)
+                    .get();
+                String duty = DriverDoc['onDuty'];
+                if (selectedIndex == 0) {
+                  if (duty == 'รับงาน') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                    );
+                  } else {
+                    stopcheckChange();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DriverPage()),
+                    );
+                  }
+                } else if (selectedIndex == 1) {
+                  if (duty == 'รับงาน') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                    );
+                  } else {
+                    stopcheckChange();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DriverProfile()),
+                    );
+                  }
+                } else if (selectedIndex == 2) {
+                  if (duty == 'รับงาน') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
+                    );
+                  } else {
+                    _showLogoutDialog(context);
+                  }
                 }
-              } else if (selectedIndex == 1) {
-                if (duty == 'รับงาน') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
-                  );
-                } else {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DriverProfile()),
-                  );
-                }
-              } else if (selectedIndex == 2) {
-                if (duty == 'รับงาน') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('กรุณาส่งออเดอร์ให้เสร็จก่อน')),
-                  );
-                } else {
-                  _showLogoutDialog(context);
-                }
-              }
-            });
+              });
+            }
           },
           type: BottomNavigationBarType.fixed, // Ensures all items are shown
         ),
@@ -272,8 +280,9 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                 const Text(
                                   'DELIVERING',
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Container(
@@ -283,50 +292,66 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                     borderRadius: BorderRadius.circular(8),
                                     color: Colors.grey[300],
                                   ),
-                                  child: image2 != null
-                                      ? GestureDetector(
-                                          onTap: () async {
-                                            log('start camera upload:');
-                                            image2 = await picker.pickImage(
-                                                source: ImageSource.camera);
-                                            if (image2 != null) {
-                                              log('image path:');
-                                              log(image2!.path);
-                                              imageUrl2 =
-                                                  await uploadImage(image2!);
-                                              setState(
-                                                  () {}); // Update UI after new image is captured
-                                            }
-                                          },
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.file(
-                                              File(image2!.path),
-                                              fit: BoxFit.cover,
-                                            ),
+                                  child: orderData?['pic_2'] != null &&
+                                          orderData?['pic_2'].isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            orderData?['pic_2'],
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Icon(
+                                                Icons.broken_image,
+                                                color: Colors.red,
+                                                size: 60,
+                                              );
+                                            },
                                           ),
                                         )
-                                      : IconButton(
-                                          icon: const Icon(
-                                            Icons.camera_alt_outlined,
-                                            size: 60,
-                                            color: Colors.black45,
-                                          ),
-                                          onPressed: () async {
-                                            log('start camera upload:');
-                                            image2 = await picker.pickImage(
-                                                source: ImageSource.camera);
-                                            if (image2 != null) {
-                                              log('image path:');
-                                              log(image2!.path);
-                                              imageUrl2 =
-                                                  await uploadImage(image2!);
-                                              setState(
-                                                  () {}); // Update UI after image is captured
-                                            }
-                                          },
-                                        ),
+                                      : image2 != null
+                                          ? GestureDetector(
+                                              onTap: () async {
+                                                log('start camera upload:');
+                                                image2 = await picker.pickImage(
+                                                    source: ImageSource.camera);
+                                                if (image2 != null) {
+                                                  log('image path: ${image2!.path}');
+                                                  imageUrl2 = await uploadImage(
+                                                      image2!);
+                                                  setState(
+                                                      () {}); // Update UI after new image is captured
+                                                }
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.file(
+                                                  File(image2!.path),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            )
+                                          : IconButton(
+                                              icon: const Icon(
+                                                Icons.camera_alt_outlined,
+                                                size: 60,
+                                                color: Colors.black45,
+                                              ),
+                                              onPressed: () async {
+                                                log('start camera upload:');
+                                                image2 = await picker.pickImage(
+                                                    source: ImageSource.camera);
+                                                if (image2 != null) {
+                                                  log('image path: ${image2!.path}');
+                                                  imageUrl2 = await uploadImage(
+                                                      image2!);
+                                                  setState(
+                                                      () {}); // Update UI after image is captured
+                                                }
+                                              },
+                                            ),
                                 ),
                               ],
                             ),
@@ -334,16 +359,18 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
 
                           const SizedBox(height: 2),
 
-// Delivered camera button
+                          // Delivered camera button
                           Padding(
+                            //pic3
                             padding: const EdgeInsets.all(5.0),
                             child: Column(
                               children: [
                                 const Text(
                                   'DELIVERED',
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Container(
@@ -353,52 +380,66 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                                     borderRadius: BorderRadius.circular(8),
                                     color: Colors.grey[300],
                                   ),
-                                  child: image3 != null
-                                      ? GestureDetector(
-                                          onTap: () async {
-                                            log('start camera upload:');
-                                            image3 = await picker.pickImage(
-                                                source: ImageSource.camera);
-                                            if (image3 != null) {
-                                              log('image path:');
-                                              log(image3!.path);
-                                              imageUrl3 =
-                                                  await uploadImgderivered(
-                                                      image3!);
-                                              setState(
-                                                  () {}); // Update UI after new image is captured
-                                            }
-                                          },
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.file(
-                                              File(image3!.path),
-                                              fit: BoxFit.cover,
-                                            ),
+                                  child: orderData?['pic_3'] != null &&
+                                          orderData?['pic_3'].isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            orderData?['pic_3'],
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Icon(
+                                                Icons.broken_image,
+                                                color: Colors.red,
+                                                size: 60,
+                                              );
+                                            },
                                           ),
                                         )
-                                      : IconButton(
-                                          icon: const Icon(
-                                            Icons.camera_alt_outlined,
-                                            size: 60,
-                                            color: Colors.black45,
-                                          ),
-                                          onPressed: () async {
-                                            log('start camera upload:');
-                                            image3 = await picker.pickImage(
-                                                source: ImageSource.camera);
-                                            if (image3 != null) {
-                                              log('image path:');
-                                              log(image3!.path);
-                                              imageUrl3 =
-                                                  await uploadImgderivered(
+                                      : image3 != null
+                                          ? GestureDetector(
+                                              onTap: () async {
+                                                log('start camera upload:');
+                                                image3 = await picker.pickImage(
+                                                    source: ImageSource.camera);
+                                                if (image3 != null) {
+                                                  log('image path: ${image3!.path}');
+                                                  imageUrl3 = await uploadImgderivered(
                                                       image3!);
-                                              setState(
-                                                  () {}); // Update UI after image is captured
-                                            }
-                                          },
-                                        ),
+                                                  setState(
+                                                      () {}); // Update UI after new image is captured
+                                                }
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.file(
+                                                  File(image3!.path),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            )
+                                          : IconButton(
+                                              icon: const Icon(
+                                                Icons.camera_alt_outlined,
+                                                size: 60,
+                                                color: Colors.black45,
+                                              ),
+                                              onPressed: () async {
+                                                log('start camera upload:');
+                                                image3 = await picker.pickImage(
+                                                    source: ImageSource.camera);
+                                                if (image3 != null) {
+                                                  log('image path: ${image3!.path}');
+                                                  imageUrl3 = await uploadImgderivered(
+                                                      image3!);
+                                                  setState(
+                                                      () {}); // Update UI after image is captured
+                                                }
+                                              },
+                                            ),
                                 ),
                               ],
                             ),
@@ -553,6 +594,7 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
                 } catch (e) {
                   log(e.toString());
                 }
+                stopcheckChange();
                 // Navigate to another page after completing the order
                 Navigator.pushReplacement(
                   context,
@@ -581,18 +623,13 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
 
     // รับ URL ของรูปภาพที่ถูกอัปโหลด
     String downloadURL = await imageRef.getDownloadURL();
-    var data ={'pic_2':downloadURL,
-    'order_status':"3"};
-    if(downloadURL.isNotEmpty){
-      
+    var data = {'pic_2': downloadURL, 'order_status': "3"};
+    if (downloadURL.isNotEmpty) {
       db
           .collection('Orders')
           .doc(widget.order['orderId'])
           .set(data, SetOptions(merge: true));
     }
-    
-
-  
 
     return downloadURL;
   }
@@ -611,15 +648,44 @@ class _DriverOrderPageState extends State<DriverOrderPage> {
 
     // รับ URL ของรูปภาพที่ถูกอัปโหลด
     String downloadURL = await imageRef.getDownloadURL();
-    var data ={'pic_3':downloadURL,
-    'order_status':"4"};
-    if(downloadURL.isNotEmpty){
-      
+    var data = {'pic_3': downloadURL, 'order_status': "4"};
+    if (downloadURL.isNotEmpty) {
       db
           .collection('Orders')
           .doc(widget.order['orderId'])
           .set(data, SetOptions(merge: true));
     }
     return downloadURL;
+  }
+
+  void checkChange() {
+    var db = FirebaseFirestore.instance;
+
+    final docRef = db.collection("Orders").doc(widget.order['orderId']);
+    listener = docRef.snapshots().listen(
+      (event) {
+        var data = event.data();
+        if (data != null) {
+          setState(() {
+            loadUserData();
+            orderData = data;
+            // เก็บข้อมูลใหม่ในตัวแปร
+          });
+          log("current data: ${event.data()}");
+        } else {
+          log('No data found for the document');
+        }
+      },
+      onError: (error) => log("Listen failed: $error"),
+    );
+
+    // log แสดงรายละเอียดของ listener (ไม่แนะนำให้ใช้ toString() ตรงๆ)
+    log('Listener created: $listener');
+  }
+
+  void stopcheckChange() {
+    if (listener != null) {
+      listener!.cancel();
+    }
   }
 }
