@@ -10,6 +10,7 @@ import 'package:duckddproject/pages/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+
 //g
 class Receiverstatus extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -45,14 +46,13 @@ class _ReceiverstatusState extends State<Receiverstatus> {
     startRealtimeGet();
     if (widget.order['order_status'] == "4") {
       stopUpdates();
-    }else {
+    } else {
       driverLocation();
       startLocationUpdates();
     }
   }
 
   Future<void> driverLocation() async {
-    
     if (widget.order['rider'] == null ||
         widget.order['rider'].toString().isEmpty) {
       log('No rider assigned. Waiting for a driver to accept the order.');
@@ -141,7 +141,6 @@ class _ReceiverstatusState extends State<Receiverstatus> {
       });
     }
   }
-
 
   void startRealtimeGet() {
     var db = FirebaseFirestore.instance;
@@ -497,7 +496,6 @@ class _ReceiverstatusState extends State<Receiverstatus> {
                           ]
                         ],
 
-                        // Button for checking package picture
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
                           child: ElevatedButton.icon(
@@ -509,7 +507,8 @@ class _ReceiverstatusState extends State<Receiverstatus> {
                                   return AlertDialog(
                                     title: Text('Package Picture'),
                                     content: Column(
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisSize: MainAxisSize
+                                          .min, // Let the column take minimum space
                                       children: [
                                         // Check order_status and display the corresponding image
                                         if (orderData != null)
@@ -520,11 +519,14 @@ class _ReceiverstatusState extends State<Receiverstatus> {
                                             orderData?['pic_1'] != null &&
                                                     orderData?['pic_1']
                                                         .isNotEmpty
-                                                ? Image.network(
-                                                    orderData?['pic_1'],
-                                                    fit: BoxFit.cover,
+                                                ? SizedBox(
+                                                    // Wrap the image in SizedBox for proper layout
                                                     height: 150,
                                                     width: double.infinity,
+                                                    child: Image.network(
+                                                      orderData?['pic_1'],
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : const Text(
                                                     'No image available for pic_1.')
@@ -534,11 +536,14 @@ class _ReceiverstatusState extends State<Receiverstatus> {
                                             orderData?['pic_2'] != null &&
                                                     orderData?['pic_2']
                                                         .isNotEmpty
-                                                ? Image.network(
-                                                    orderData?['pic_2'],
-                                                    fit: BoxFit.cover,
+                                                ? SizedBox(
+                                                    // Wrap the image in SizedBox for proper layout
                                                     height: 150,
                                                     width: double.infinity,
+                                                    child: Image.network(
+                                                      orderData?['pic_2'],
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : const Text(
                                                     'No image available for pic_2.')
@@ -548,19 +553,21 @@ class _ReceiverstatusState extends State<Receiverstatus> {
                                             orderData?['pic_3'] != null &&
                                                     orderData?['pic_3']
                                                         .isNotEmpty
-                                                ? Image.network(
-                                                    orderData?['pic_3'],
-                                                    fit: BoxFit.cover,
+                                                ? SizedBox(
+                                                    // Wrap the image in SizedBox for proper layout
                                                     height: 150,
                                                     width: double.infinity,
+                                                    child: Image.network(
+                                                      orderData?['pic_3'],
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : const Text(
                                                     'No image available for pic_3.'),
                                         const SizedBox(height: 10),
-                                        Text(
-                                          orderData?[
-                                              'descrip'], // Adjust as needed
-                                        ),
+                                        if (orderData != null &&
+                                            orderData?['descrip'] != null)
+                                          Text(orderData?['descrip']),
                                       ],
                                     ),
                                     actions: [
