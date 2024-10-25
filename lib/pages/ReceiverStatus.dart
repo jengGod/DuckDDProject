@@ -10,7 +10,7 @@ import 'package:duckddproject/pages/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-
+//g
 class Receiverstatus extends StatefulWidget {
   final Map<String, dynamic> order;
   const Receiverstatus({Key? key, required this.order}) : super(key: key);
